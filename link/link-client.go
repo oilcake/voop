@@ -8,13 +8,12 @@ import (
 
 func Ping(message string) string {
 
-	// connect to socket
+	// open socket
 	conn, _ := net.Dial("tcp", "127.0.0.1:17000")
 
-	// send to socket
+	// send message
 	fmt.Fprintf(conn, "%s", message)
 	// listen response
 	response, _ := bufio.NewReader(conn).ReadString('\n')
-	// fmt.Print(message)
 	return response
 }
