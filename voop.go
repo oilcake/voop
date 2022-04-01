@@ -1,18 +1,70 @@
 package main
 
 import (
+	"flag"
 	"fmt"
-
+	"io/fs"
+	"io/ioutil"
+	"log"
+	"math/rand"
+	_ "net/http/pprof"
+	"time"
 	"voop/link"
+	"voop/player"
+
+	"gocv.io/x/gocv"
 )
 
 func main() {
-	message := link.Ping("status")
-	data := message[7:]
-	status, _ := link.Parse(data)
-	fmt.Println("from socket", message)
-	fmt.Println(status.Peers)
-	fmt.Println(status.Bpm)
-	fmt.Println(status.Start)
-	fmt.Println(status.Beat)
+	// read video folder
+	var folder = flag.String("folder", "./", "path to video files")
+	flag.Parse()
+	fmt.Println(*folder)
+	file, err := ChooseRandomFile(folder)
+
+	// initialize transport
+	t, err := link.NewTransport()
+	if err != nil || t == nil {
+		log.Fatal("can't start transport", err)
+	}
+	// open video
+	media, err := player.NewMedia(file.Name())
+	defer media.Close()
+	// make window
+	window := gocv.NewWindow("Voop")
+	defer window.Close()
+
+	if window == nil {
+		log.Fatal("Unable to create Window")
+	}
+	if !window.IsOpen() {
+		log.Fatal("Window should have been open")
+	}
+	window.SetWindowProperty(gocv.WindowPropertyAutosize, gocv.WindowNormal)
+	window.ResizeWindow(100, 100)
+
+	// play video in cycle forever
+	for {
+		ph := media.Position(t)
+		fmt.Printf("\rCurrent beat is %.9f and phase is %.9f", t.St.Beat, ph)
+		img := media.Frame(ph)
+		window.IMShow(img)
+		v := window.WaitKey(1)
+		if v >= 0 {
+			break
+		}
+		time.Sleep(time.Millisecond * 40)
+	}
+}
+
+func ChooseRandomFile(path *string) (fs.FileInfo, error) {
+
+	files, err := ioutil.ReadDir(*path)
+	if err != nil {
+		return nil, err
+	}
+
+	file := files[rand.Intn(len(files))]
+	fmt.Printf("Playing file %v\n", file.Name())
+	return file, nil
 }
