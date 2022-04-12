@@ -36,8 +36,7 @@ func NewTransport() (*Transport, error) {
 }
 
 func (t *Transport) BeatDur() (duration float64) {
-	st := <-t.St
-	oneBeatDuration := 60.0 / float64(st.Bpm)
-	log.Printf("one beat is %v milliseconds\n", oneBeatDuration)
+	oneBeatDuration := 60.0 / float64((<-t.St).Bpm)
+	log.Printf("one beat is %v seconds\n", oneBeatDuration)
 	return oneBeatDuration
 }

@@ -18,11 +18,12 @@ type ImgShape struct {
 }
 
 type Media struct {
+	Name       string
 	V          *gocv.VideoCapture
 	Duration   float64
 	Framecount float64
 	F          *gocv.Mat //this is a current frame object
-	Pattern    float64
+	P          float64
 	Shape      ImgShape
 }
 
@@ -48,14 +49,16 @@ func NewMedia(filename string) (m *Media, err error) {
 	}
 
 	f := gocv.NewMat()
-	return &Media{
+	media := &Media{
+		Name:       filename,
 		V:          clip,
 		Duration:   msDur,
 		Framecount: framecount,
 		F:          &f,
-		Pattern:    0.0,
+		P:          0.0,
 		Shape:      shape,
-	}, nil
+	}
+	return media, nil
 }
 
 func (m *Media) Frame(phase float64) gocv.Mat {
@@ -75,28 +78,31 @@ func (m *Media) Frame(phase float64) gocv.Mat {
 }
 
 func (m *Media) BarsTotal(BeatDuration float64, Measure uint8) (f float64) {
-	bars := math.Mod(math.Round(m.Duration/BeatDuration), float64(Measure))
+	beatsTotal := int(math.Round(m.Duration / BeatDuration))
+	log.Println("beats total is", beatsTotal)
+	bars := beatsTotal / int(Measure)
 	defer log.Println("bars total", bars)
 	if bars < 1.0 {
 		return 1.0
 	}
-	return bars
+	return float64(bars)
 }
 
-func (m *Media) CalcPattern(t *sync.Transport) {
-	if (<-t.St).D {
-		log.Println("Tempo is now ", (<-t.St).Bpm)
-		sqLog := math.Log2(m.BarsTotal(t.BeatDur(), t.TimeSignature.Measure))
-		length := math.Pow(2, math.Round(sqLog))
-		log.Println("pattern", length)
-		length = length * 2 // TODO - find more logical way and test on different lengths
-		m.Pattern = length
-	}
+func (m *Media) Pattern(t *sync.Transport) {
+	log.Println("Tempo is now", (<-t.St).Bpm)
+	// finding a "square" pattern - bars count to fit media duration in musical time
+	sqLog := math.Log2(m.BarsTotal(t.BeatDur(), t.TimeSignature.Measure))
+	// I am adding 1 to pow to round to a greater value just because it feels better
+	length := math.Pow(2, math.Round(sqLog)+1)
+	log.Println("pattern", length)
+	m.P = length
 }
 
 func (m *Media) Position(t *sync.Transport) float64 {
-	m.CalcPattern(t)
-	phase := math.Mod((<-t.St).Beat, m.Pattern) / m.Pattern
+	if (<-t.St).D {
+		m.Pattern(t)
+	}
+	phase := math.Mod((<-t.St).Beat, m.P) / m.P
 	return phase
 }
 
