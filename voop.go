@@ -3,7 +3,6 @@ package main
 import (
 	"flag"
 	"fmt"
-	"io/fs"
 	"io/ioutil"
 	"log"
 	"math/rand"
@@ -21,6 +20,10 @@ func main() {
 	flag.Parse()
 	fmt.Println(*folder)
 	file, err := ChooseRandomFile(folder)
+	if err != nil {
+		log.Fatal("error while opening file", err)
+	}
+	fmt.Println()
 
 	// initialize transport
 	t, err := link.NewTransport()
@@ -28,7 +31,7 @@ func main() {
 		log.Fatal("can't start transport", err)
 	}
 	// open video
-	media, err := player.NewMedia(file.Name())
+	media, err := player.NewMedia(file)
 	defer media.Close()
 	// make window
 	window := gocv.NewWindow("Voop")
@@ -41,6 +44,7 @@ func main() {
 		log.Fatal("Window should have been open")
 	}
 	window.SetWindowProperty(gocv.WindowPropertyAutosize, gocv.WindowNormal)
+	window.SetWindowProperty(gocv.WindowPropertyAspectRatio, gocv.WindowKeepRatio)
 	window.ResizeWindow(100, 100)
 
 	// play video in cycle forever
@@ -57,14 +61,15 @@ func main() {
 	}
 }
 
-func ChooseRandomFile(path *string) (fs.FileInfo, error) {
+func ChooseRandomFile(path *string) (string, error) {
 
 	files, err := ioutil.ReadDir(*path)
 	if err != nil {
-		return nil, err
+		return "", err
 	}
-
-	file := files[rand.Intn(len(files))]
-	fmt.Printf("Playing file %v\n", file.Name())
+	log.Println("files total", len(files))
+	rand.Seed(time.Now().UnixNano())
+	file := *path + "/" + files[rand.Intn(len(files))].Name()
+	fmt.Printf("Playing file %v\n", file)
 	return file, nil
 }

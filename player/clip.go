@@ -55,14 +55,14 @@ func (m *Media) Frame(phase float64) gocv.Mat {
 		log.Fatal("Unable to read VideoCaptureFile")
 	}
 	// resize frame
-	scaledSize := image.Point{200, 100}
+	scaledSize := image.Point{600, 400}
 	gocv.Resize(*m.F, m.F, scaledSize, 0.0, 0.0, gocv.InterpolationDefault)
 	return *m.F
 }
 
 func (m *Media) BarsTotal(BeatDuration float64, Measure uint8) (f float64) {
 	bars := math.Mod(math.Round(m.Duration/BeatDuration), float64(Measure))
-	log.Println("bars total", bars)
+	defer log.Println("bars total", bars)
 	if bars < 1.0 {
 		return 1.0
 	}
