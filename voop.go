@@ -8,8 +8,8 @@ import (
 	"math/rand"
 	_ "net/http/pprof"
 	"time"
-	"voop/link"
 	"voop/player"
+	"voop/sync"
 
 	"gocv.io/x/gocv"
 )
@@ -26,12 +26,19 @@ func main() {
 	fmt.Println()
 
 	// initialize transport
-	t, err := link.NewTransport()
+	t, err := sync.NewTransport()
 	if err != nil || t == nil {
 		log.Fatal("can't start transport", err)
 	}
+
+	log.Println("Transport is created")
+
+	go sync.Link(sync.NewConnection(), t.St)
 	// open video
 	media, err := player.NewMedia(file)
+	if err != nil {
+		log.Fatal("Can't open media")
+	}
 	defer media.Close()
 	// make window
 	window := gocv.NewWindow("Voop")
@@ -46,18 +53,17 @@ func main() {
 	window.SetWindowProperty(gocv.WindowPropertyAutosize, gocv.WindowNormal)
 	window.SetWindowProperty(gocv.WindowPropertyAspectRatio, gocv.WindowKeepRatio)
 	window.ResizeWindow(100, 100)
-
 	// play video in cycle forever
 	for {
 		ph := media.Position(t)
-		fmt.Printf("\rCurrent beat is %.9f and phase is %.9f", t.St.Beat, ph)
+		fmt.Printf("\rCurrent beat is %.9f and phase is %.9f", (<-t.St).Beat, ph)
 		img := media.Frame(ph)
 		window.IMShow(img)
 		v := window.WaitKey(1)
 		if v >= 0 {
 			break
 		}
-		time.Sleep(time.Millisecond * 40)
+		// time.Sleep(time.Millisecond * 40)
 	}
 }
 
@@ -70,6 +76,6 @@ func ChooseRandomFile(path *string) (string, error) {
 	log.Println("files total", len(files))
 	rand.Seed(time.Now().UnixNano())
 	file := *path + "/" + files[rand.Intn(len(files))].Name()
-	fmt.Printf("Playing file %v\n", file)
+	log.Printf("Playing file %v\n", file)
 	return file, nil
 }

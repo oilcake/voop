@@ -1,31 +1,50 @@
-package link
+package sync
 
 import (
 	"bufio"
 	"fmt"
 	"log"
 	"net"
-	"time"
 
 	"olympos.io/encoding/edn"
 )
 
-func Watch(conn net.Conn, st *Status, d *bool) {
+func NewConnection() (conn net.Conn) {
+	// open socket
+	conn, err := net.Dial(protocol, address)
+	if err != nil {
+		log.Fatal("cannot establish connection", err)
+		return nil
+	}
+	return
+}
+
+func Link(conn net.Conn, st chan<- Status) {
+	// init status
+	watch := &Status{
+		Peers: 0,
+		Bpm:   120.0,
+		Start: 0,
+		Beat:  0.0,
+		D:     true,
+	}
+	// watch what's in Link
 	for {
-		oldTempo := st.Bpm
+		st <- *watch
+		oldTempo := watch.Bpm
 		response, err := Ping(conn, "status")
 		if err != nil {
 			log.Fatal("no response from Carabiner", err)
 		}
-		err = Parse(response, st)
+		err = Parse(response, watch)
 		if err != nil {
 			log.Fatal("Parsing error", err)
 		}
-		newTempo := st.Bpm
+		newTempo := watch.Bpm
 		if oldTempo != newTempo {
-			*d = true
+			watch.D = true
 		}
-		time.Sleep(time.Millisecond * 80)
+		watch.D = false
 	}
 }
 

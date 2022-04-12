@@ -1,10 +1,6 @@
-package link
+package sync
 
-import (
-	"fmt"
-	"log"
-	"net"
-)
+import "log"
 
 const (
 	protocol = "tcp"
@@ -15,9 +11,8 @@ const (
 )
 
 type Transport struct {
-	St            *Status
+	St            chan Status
 	TimeSignature *TimeSignature
-	D             *bool // tempo change watcher
 }
 
 type Status struct {
@@ -25,6 +20,7 @@ type Status struct {
 	Bpm   float32
 	Start int64
 	Beat  float64
+	D     bool // tempo is change flag
 }
 type TimeSignature struct {
 	Measure  uint8
@@ -32,25 +28,16 @@ type TimeSignature struct {
 }
 
 func NewTransport() (*Transport, error) {
-	var st Status
-	// open socket
-	conn, err := net.Dial(protocol, address)
-	if err != nil {
-		log.Fatal("cannot establish connection", err)
-	}
-
-	tWatcher := true
-	go Watch(conn, &st, &tWatcher)
-
+	st := make(chan Status)
 	return &Transport{
-		St:            &st,
+		St:            st,
 		TimeSignature: &TimeSignature{4, 4},
-		D:             &tWatcher,
 	}, nil
 }
 
 func (t *Transport) BeatDur() (duration float64) {
-	oneBeatDuration := 60.0 / float64(t.St.Bpm)
-	fmt.Printf("one beat is %v milliseconds\n", oneBeatDuration)
+	st := <-t.St
+	oneBeatDuration := 60.0 / float64(st.Bpm)
+	log.Printf("one beat is %v milliseconds\n", oneBeatDuration)
 	return oneBeatDuration
 }
