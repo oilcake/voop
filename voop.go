@@ -43,22 +43,7 @@ func main() {
 	// start Ableton Link watcher
 	go sync.Link(sync.NewConnection(), t.St)
 
-	// choose a file
-	file, err := ChooseRandomFile(folder)
-	if err != nil {
-		log.Fatal("looks like no file", err)
-	}
-	fmt.Println()
-	// open it
-	media, err := player.NewMedia(file)
-	if err != nil {
-		log.Fatal("Can't open media")
-	}
-	// and play
-	PlayMedia(media, t, window) // until any key
-	media.Close()
-
-	// OR
+	// initialize random generator
 	rand.Seed(time.Now().UnixNano())
 	// preload a bunch of files
 	b, err := player.OpenFolder(folder)

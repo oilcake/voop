@@ -72,7 +72,7 @@ func (m *Media) Frame(phase float64) gocv.Mat {
 		log.Fatal("Unable to read VideoCaptureFile")
 	}
 	// resize frame
-	scaledSize := image.Point{600, int(math.Round(600.0 / m.Shape.AspRt))}
+	scaledSize := image.Point{1000, int(math.Round(1000.0 / m.Shape.AspRt))}
 	gocv.Resize(*m.F, m.F, scaledSize, 0.0, 0.0, gocv.InterpolationDefault)
 	return *m.F
 }
@@ -92,8 +92,8 @@ func (m *Media) Pattern(t *sync.Transport) {
 	log.Println("Tempo is now", (<-t.St).Bpm)
 	// finding a "square" pattern - bars count to fit media duration in musical time
 	sqLog := math.Log2(m.BarsTotal(t.BeatDur(), t.TimeSignature.Measure))
-	// I am adding 1 to pow to round to a greater value just because it feels better
-	length := math.Pow(2, math.Round(sqLog)+1)
+	// I am adding 2 to pow to round to a greater value just because it feels better
+	length := math.Pow(2, math.Round(sqLog)+2)
 	log.Println("pattern", length)
 	m.P = length
 }
