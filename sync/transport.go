@@ -6,12 +6,12 @@ const (
 	protocol = "tcp"
 	address  = "127.0.0.1:17000"
 
-	Measure  = 4 // THIS IS A STAB!!!!
-	Division = 4 // THIS IS A STAB!!!!
+	Measure  = 4 // THIS IS A STUB!!!!
+	Division = 4 // THIS IS A STUB!!!!
 )
 
 type Transport struct {
-	St            chan Status
+	Status        chan Status
 	TimeSignature *TimeSignature
 }
 
@@ -20,8 +20,9 @@ type Status struct {
 	Bpm   float32
 	Start int64
 	Beat  float64
-	D     bool // tempo is change flag
+	D     bool // "tempo has been changed" flag
 }
+
 type TimeSignature struct {
 	Measure  uint8
 	Division uint8
@@ -29,14 +30,15 @@ type TimeSignature struct {
 
 func NewTransport() (*Transport, error) {
 	st := make(chan Status)
+	NewLink(st)
 	return &Transport{
-		St:            st,
-		TimeSignature: &TimeSignature{4, 4},
+		Status:        st,
+		TimeSignature: &TimeSignature{Measure, Division},
 	}, nil
 }
 
 func (t *Transport) BeatDur() (duration float64) {
-	oneBeatDuration := 60.0 / float64((<-t.St).Bpm)
+	oneBeatDuration := 60.0 / float64((<-t.Status).Bpm)
 	log.Printf("one beat is %v seconds\n", oneBeatDuration)
 	return oneBeatDuration
 }

@@ -23,11 +23,11 @@ type Media struct {
 	Duration   float64
 	Framecount float64
 	F          *gocv.Mat //this is a current frame object
-	P          float64
+	P          float64   // Media pattern's length
 	Shape      ImgShape
 }
 
-func NewMedia(filename string) (m *Media, err error) {
+func NewMedia(filename string, t *sync.Transport) (m *Media, err error) {
 	clip, err := gocv.VideoCaptureFile(filename)
 	if !clip.IsOpened() {
 		return nil, errors.New("Error opening video stream or file")
@@ -58,6 +58,7 @@ func NewMedia(filename string) (m *Media, err error) {
 		P:          0.0,
 		Shape:      shape,
 	}
+	media.Pattern(t)
 	return media, nil
 }
 
@@ -72,7 +73,7 @@ func (m *Media) Frame(phase float64) gocv.Mat {
 		log.Fatal("Unable to read VideoCaptureFile")
 	}
 	// resize frame
-	scaledSize := image.Point{1000, int(math.Round(1000.0 / m.Shape.AspRt))}
+	scaledSize := image.Point{200, int(math.Round(200.0 / m.Shape.AspRt))}
 	gocv.Resize(*m.F, m.F, scaledSize, 0.0, 0.0, gocv.InterpolationDefault)
 	return *m.F
 }
@@ -88,21 +89,34 @@ func (m *Media) BarsTotal(BeatDuration float64, Measure uint8) (f float64) {
 	return float64(bars)
 }
 
-func (m *Media) Pattern(t *sync.Transport) {
-	log.Println("Tempo is now", (<-t.St).Bpm)
+func (m *Media) Squarize(t *sync.Transport, b float64) (length float64) {
 	// finding a "square" pattern - bars count to fit media duration in musical time
-	sqLog := math.Log2(m.BarsTotal(t.BeatDur(), t.TimeSignature.Measure))
-	// I am adding 2 to pow to round to a greater value just because it feels better
-	length := math.Pow(2, math.Round(sqLog)+2)
-	log.Println("pattern", length)
-	m.P = length
+	sqLog := math.Log2(b)
+	// and return the needed power to make it square
+	return math.Pow(2, math.Round(sqLog))
+
+}
+
+func (m *Media) Pattern(t *sync.Transport) {
+	log.Println("Tempo is now", (<-t.Status).Bpm)
+	b := m.BarsTotal(t.BeatDur(), t.TimeSignature.Measure)
+	if b > 4.0 {
+		m.P = b
+	} else {
+		m.P = m.Squarize(t, b)
+	}
+	m.P = m.P * float64(t.TimeSignature.Measure)
+	log.Println("pattern", m.P)
+
 }
 
 func (m *Media) Position(t *sync.Transport) float64 {
-	if (<-t.St).D {
+	st := <-t.Status
+
+	if st.D {
 		m.Pattern(t)
 	}
-	phase := math.Mod((<-t.St).Beat, m.P) / m.P
+	phase := math.Mod(st.Beat, m.P) / m.P
 	return phase
 }
 

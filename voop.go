@@ -20,6 +20,9 @@ func main() {
 	flag.Parse()
 	fmt.Println(*folder)
 
+	// initialize clock
+	clock := sync.NewClock(40 * time.Millisecond)
+
 	// initialize transport
 	t, err := sync.NewTransport()
 	if err != nil || t == nil {
@@ -40,13 +43,10 @@ func main() {
 	window.SetWindowProperty(gocv.WindowPropertyAspectRatio, gocv.WindowKeepRatio)
 	window.ResizeWindow(100, 100)
 
-	// start Ableton Link watcher
-	go sync.Link(sync.NewConnection(), t.St)
-
 	// initialize random generator
 	rand.Seed(time.Now().UnixNano())
 	// preload a bunch of files
-	b, err := player.OpenFolder(folder)
+	b, err := player.OpenFolder(folder, t)
 	if err != nil {
 		log.Fatal("cannot preload folder", err)
 	}
@@ -57,26 +57,25 @@ func main() {
 	// and play randoms from it forever
 	for {
 		media := b[rand.Intn(len(b)-1)]
-		PlayMedia(media, t, window) // until any key
+		PlayMedia(media, t, window, clock) // until any key
 	}
 }
 
-func PlayMedia(media *player.Media, t *sync.Transport, window *gocv.Window) {
+func PlayMedia(media *player.Media, t *sync.Transport, window *gocv.Window, clock *sync.Clock) {
 	// who is it
 	log.Println("playing file", media.Name)
-	// perform init calculations on it
-	if media.P == 0.0 {
-		media.Pattern(t)
-	}
-	// in cycle forever
+	// and play it in cycle forever
 	for {
-		// calculate a playing phase
-		ph := media.Position(t)
-		fmt.Printf("\rCurrent beat is %.9f and phase is %.9f", (<-t.St).Beat, ph)
-		// to retrieve specific frame
-		img := media.Frame(ph)
-		// and display it
-		window.IMShow(img)
+		select {
+		case <-clock.Trigger:
+			// calculate a playing phase
+			ph := media.Position(t)
+			fmt.Printf("\rCurrent beat is %.9f and phase is %.9f", (<-t.Status).Beat, ph)
+			// to retrieve specific frame
+			img := media.Frame(ph)
+			// and display it
+			window.IMShow(img)
+		}
 		v := window.WaitKey(1)
 		if v >= 0 {
 			break

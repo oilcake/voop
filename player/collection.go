@@ -4,6 +4,7 @@ import (
 	"io/ioutil"
 	"log"
 	"path/filepath"
+	"voop/sync"
 )
 
 var (
@@ -12,12 +13,12 @@ var (
 
 type Collection []*Media
 
-func OpenFolder(path *string) (Collection, error) {
+func OpenFolder(path *string, t *sync.Transport) (Collection, error) {
 	files := SupportedFiles(path)
 	opened := make([]*Media, len(files))
 	var err error
 	for i, file := range files {
-		opened[i], err = NewMedia(file)
+		opened[i], err = NewMedia(file, t)
 		if err != nil {
 			return nil, err
 		}
