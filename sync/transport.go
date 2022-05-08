@@ -11,7 +11,7 @@ const (
 )
 
 type Transport struct {
-	Status        chan Status
+	Status        <-chan Status
 	TimeSignature *TimeSignature
 }
 

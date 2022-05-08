@@ -9,11 +9,6 @@ import (
 	"olympos.io/encoding/edn"
 )
 
-type Link struct {
-	message chan string
-	st      *Status
-}
-
 func NewConnection() (conn net.Conn) {
 	// open socket
 	conn, err := net.Dial(protocol, address)
