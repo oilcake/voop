@@ -65,6 +65,7 @@ func PlayMedia(media *player.Media, t *sync.Transport, window *gocv.Window, cloc
 	// who is it
 	log.Println("playing file", media.Name)
 	// and play it in cycle forever
+play:
 	for {
 		select {
 		case <-clock.Trigger:
@@ -77,8 +78,13 @@ func PlayMedia(media *player.Media, t *sync.Transport, window *gocv.Window, cloc
 			window.IMShow(img)
 		}
 		v := window.WaitKey(1)
-		if v >= 0 {
-			break
+		switch v {
+		case getKey('q'):
+			break play
+		case getKey('f'):
+			window.SetWindowProperty(gocv.WindowPropertyFullscreen, gocv.WindowFullscreen)
+		case getKey('g'):
+			window.SetWindowProperty(gocv.WindowPropertyFullscreen, gocv.WindowNormal)
 		}
 	}
 }
@@ -94,4 +100,8 @@ func ChooseRandomFile(path *string) (string, error) {
 	file := *path + "/" + files[rand.Intn(len(files)-1)].Name()
 	log.Printf("Playing file %v\n", file)
 	return file, nil
+}
+
+func getKey(r rune) int {
+	return int(r)
 }
