@@ -15,6 +15,7 @@ import (
 )
 
 func main() {
+	fmt.Println("Starting")
 	// read video folder
 	var folder = flag.String("folder", "./", "path to video files")
 	flag.Parse()
@@ -63,7 +64,7 @@ func main() {
 
 func PlayMedia(media *player.Media, t *sync.Transport, window *gocv.Window, clock *sync.Clock) {
 	// who is it
-	log.Println("playing file", media.Name)
+	log.Println("\nplaying file", media.Name)
 	// and play it in cycle forever
 play:
 	for {
@@ -79,6 +80,15 @@ play:
 		}
 		v := window.WaitKey(1)
 		switch v {
+		case getKey('-'):
+			media.Multiple = media.Multiple * 2.0
+			media.Pattern(t)
+		case getKey('='):
+			media.Multiple = media.Multiple / 2.0
+			media.Pattern(t)
+		case getKey('0'):
+			media.Multiple = 1.0
+			media.Pattern(t)
 		case getKey('q'):
 			break play
 		case getKey('f'):
@@ -98,6 +108,7 @@ func ChooseRandomFile(path *string) (string, error) {
 	log.Println("files total", len(files))
 	rand.Seed(time.Now().UnixNano())
 	file := *path + "/" + files[rand.Intn(len(files)-1)].Name()
+	fmt.Println()
 	log.Printf("Playing file %v\n", file)
 	return file, nil
 }

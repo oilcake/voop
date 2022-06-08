@@ -11,6 +11,10 @@ import (
 	"gocv.io/x/gocv"
 )
 
+const (
+	clipWidth = 1000.0
+)
+
 type ImgShape struct {
 	W     float64
 	H     float64
@@ -24,7 +28,8 @@ type Media struct {
 	Framecount float64
 	F          *gocv.Mat //this is a current frame object
 	P          float64   // Media pattern's length
-	Shape      ImgShape
+	Shape      *ImgShape
+	Multiple   float64
 }
 
 func NewMedia(filename string, t *sync.Transport) (m *Media, err error) {
@@ -42,7 +47,7 @@ func NewMedia(filename string, t *sync.Transport) (m *Media, err error) {
 	log.Printf("duration in seconds is %v of type %T\n", msDur, msDur)
 	width := clip.Get(gocv.VideoCaptureFrameWidth)
 	height := clip.Get(gocv.VideoCaptureFrameHeight)
-	shape := ImgShape{
+	shape := &ImgShape{
 		W:     width,
 		H:     height,
 		AspRt: width / height,
@@ -57,6 +62,7 @@ func NewMedia(filename string, t *sync.Transport) (m *Media, err error) {
 		F:          &f,
 		P:          0.0,
 		Shape:      shape,
+		Multiple:   1.0,
 	}
 	media.Pattern(t)
 	return media, nil
@@ -73,7 +79,7 @@ func (m *Media) Frame(phase float64) gocv.Mat {
 		log.Fatal("Unable to read VideoCaptureFile")
 	}
 	// resize frame
-	scaledSize := image.Point{200, int(math.Round(200.0 / m.Shape.AspRt))}
+	scaledSize := image.Point{clipWidth, int(math.Round(clipWidth / m.Shape.AspRt))}
 	gocv.Resize(*m.F, m.F, scaledSize, 0.0, 0.0, gocv.InterpolationDefault)
 	return *m.F
 }
@@ -105,7 +111,7 @@ func (m *Media) Pattern(t *sync.Transport) {
 	} else {
 		m.P = m.Squarize(t, b)
 	}
-	m.P = m.P * float64(t.TimeSignature.Measure)
+	m.P = m.P * float64(t.TimeSignature.Measure) * m.Multiple
 	log.Println("pattern", m.P)
 
 }
