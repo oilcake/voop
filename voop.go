@@ -16,10 +16,6 @@ import (
 
 func main() {
 	fmt.Println("Starting")
-	// read video folder
-	var folder = flag.String("folder", "./", "path to video files")
-	flag.Parse()
-	fmt.Println(*folder)
 
 	// initialize clock
 	clock := sync.NewClock(40 * time.Millisecond)
@@ -32,71 +28,98 @@ func main() {
 	log.Println("Transport is created")
 
 	// initialize a display
-	window := gocv.NewWindow("Voop")
+	window := player.NewWindow("Voop")
 	defer window.Close()
-	if window == nil {
-		log.Fatal("Unable to create Window")
-	}
-	if !window.IsOpen() {
-		log.Fatal("Window should have been open")
-	}
-	window.SetWindowProperty(gocv.WindowPropertyAutosize, gocv.WindowNormal)
-	window.SetWindowProperty(gocv.WindowPropertyAspectRatio, gocv.WindowKeepRatio)
-	window.ResizeWindow(100, 100)
 
-	// initialize random generator
-	rand.Seed(time.Now().UnixNano())
+	p := player.Player{Clock: clock, Transport: t, Window: window}
+
+	// read video folder
+	var folder = flag.String("folder", "./", "path to video files")
+	flag.Parse()
+	fmt.Println(*folder)
 	// preload a bunch of files
-	b, err := player.OpenFolder(folder, t)
+	set, err := player.NewSet(folder, t)
 	if err != nil {
 		log.Fatal("cannot preload folder", err)
 	}
 
 	// don't forget to close everything
-	defer player.CloseFolder(b)
+	defer player.CloseSet(set)
 
 	// and play randoms from it forever
-	for {
-		media := b[rand.Intn(len(b)-1)]
-		PlayMedia(media, t, window, clock) // until any key
-	}
+	PlaySet(&p, set)
 }
 
-func PlayMedia(media *player.Media, t *sync.Transport, window *gocv.Window, clock *sync.Clock) {
+// Play functions
+type Navigator interface {
+	Now() *player.Media
+	Random()
+	Next()
+	Previous()
+}
+
+func PlaySet(p *player.Player, n Navigator) {
+
+	for {
+		// play media
+		media := n.Now()
+		action := PlayMedia(media, p) // until any keyboard action
+		fmt.Println(action)
+		switch action {
+		case "rnd":
+			n.Random()
+		case "next":
+			n.Next()
+		case "prev":
+			n.Previous()
+		}
+	}
+
+}
+
+func PlayMedia(media *player.Media, p *player.Player) (action string) {
 	// who is it
 	log.Println("\nplaying file", media.Name)
 	// and play it in cycle forever
 play:
 	for {
 		select {
-		case <-clock.Trigger:
+		case <-p.Clock.Trigger:
 			// calculate a playing phase
-			ph := media.Position(t)
-			fmt.Printf("\rCurrent beat is %.9f and phase is %.9f", (<-t.Status).Beat, ph)
+			ph := media.Position(p.Transport)
+			fmt.Printf("\rCurrent beat is %.9f and phase is %.9f", (<-p.Transport.Status).Beat, ph)
 			// to retrieve specific frame
 			img := media.Frame(ph)
 			// and display it
-			window.IMShow(img)
+			p.Window.IMShow(img)
 		}
-		v := window.WaitKey(1)
+		v := p.Window.WaitKey(1)
 		switch v {
 		case getKey('-'):
 			media.Multiple = media.Multiple * 2.0
-			media.Pattern(t)
+			media.Pattern(p.Transport)
 		case getKey('='):
 			media.Multiple = media.Multiple / 2.0
-			media.Pattern(t)
+			media.Pattern(p.Transport)
 		case getKey('0'):
 			media.Multiple = 1.0
-			media.Pattern(t)
-		case getKey('q'):
+			media.Pattern(p.Transport)
+		case getKey('/'):
+			action = "rnd"
+			break play
+		case getKey('.'):
+			action = "next"
+			break play
+		case getKey(','):
+			action = "prev"
 			break play
 		case getKey('f'):
-			window.SetWindowProperty(gocv.WindowPropertyFullscreen, gocv.WindowFullscreen)
+			p.Window.SetWindowProperty(gocv.WindowPropertyFullscreen, gocv.WindowFullscreen)
 		case getKey('g'):
-			window.SetWindowProperty(gocv.WindowPropertyFullscreen, gocv.WindowNormal)
+			p.Window.SetWindowProperty(gocv.WindowPropertyFullscreen, gocv.WindowNormal)
 		}
 	}
+	return
 }
 
 func ChooseRandomFile(path *string) (string, error) {
