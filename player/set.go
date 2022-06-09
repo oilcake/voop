@@ -1,6 +1,7 @@
 package player
 
 import (
+	"io/fs"
 	"io/ioutil"
 	"log"
 	"math/rand"
@@ -19,7 +20,7 @@ type Set struct {
 }
 
 func NewSet(path *string, t *sync.Transport) (*Set, error) {
-	files := SupportedFiles(path)
+	files := SupportedFilesFrom(path)
 	opened := make([]*Media, len(files))
 	var err error
 	for i, file := range files {
@@ -63,20 +64,35 @@ func (s *Set) Previous() {
 }
 
 // Handy functions
-func SupportedFiles(path *string) (sf []string) {
+func SupportedFilesFrom(path *string) (sf []string) {
 	sf = make([]string, 0)
-	files, err := ioutil.ReadDir(*path)
-	if err != nil {
+	if err := AddFiles(&sf, path); err != nil {
 		log.Fatal("can't open folder", err)
 	}
-	log.Println("files total", len(files))
+	log.Println("files total", len(sf))
+	return
+}
+
+func AddFiles(sf *[]string, path *string) error {
+	files, err := ioutil.ReadDir(*path)
+	if err != nil {
+		return err
+	}
+
 	for _, file := range files {
 		if Supported(file.Name()) {
 			f := *path + "/" + file.Name()
-			sf = append(sf, f)
+			*sf = append(*sf, f)
+		}
+		if file.IsDir() {
+			fp := *path + "/" + file.Name()
+			err = AddFiles(sf, &fp)
+			if err != nil {
+				return err
+			}
 		}
 	}
-	return
+	return nil
 }
 
 func Supported(file string) bool {
@@ -87,4 +103,18 @@ func Supported(file string) bool {
 		}
 	}
 	return false
+}
+
+func LookIn(s string, d fs.DirEntry, err error) error {
+	if err != nil {
+		return err
+	}
+	if !d.IsDir() {
+		println(s)
+	}
+	return nil
+}
+
+func RecursiveLook() {
+	filepath.WalkDir("..", LookIn)
 }

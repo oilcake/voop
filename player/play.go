@@ -56,7 +56,6 @@ play:
 			p.Window.IMShow(img)
 		}
 		v := p.Window.WaitKey(1)
-		log.Println("key pressed ", v)
 		switch v {
 		case 27:
 			action = "stop"
