@@ -56,7 +56,9 @@ func (s *Set) Next() {
 }
 
 func (s *Set) Previous() {
-	s.RightNow = (s.RightNow - 1) % s.Size
+	m := s.Size - s.RightNow
+	m = m % s.Size
+	s.RightNow = s.Size - m - 1
 }
 
 // Handy functions

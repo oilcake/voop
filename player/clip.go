@@ -33,6 +33,7 @@ type Media struct {
 }
 
 func NewMedia(filename string, t *sync.Transport) (m *Media, err error) {
+	// open file
 	clip, err := gocv.VideoCaptureFile(filename)
 	if !clip.IsOpened() {
 		return nil, errors.New("Error opening video stream or file")
@@ -40,11 +41,11 @@ func NewMedia(filename string, t *sync.Transport) (m *Media, err error) {
 	if err != nil {
 		return nil, err
 	}
-	// get number of frames in video
+
+	// fill video properties
 	framecount := clip.Get(gocv.VideoCaptureFrameCount)
 	fps := clip.Get(gocv.VideoCaptureFPS)
 	msDur := framecount / fps
-	log.Printf("duration in seconds is %v of type %T\n", msDur, msDur)
 	width := clip.Get(gocv.VideoCaptureFrameWidth)
 	height := clip.Get(gocv.VideoCaptureFrameHeight)
 	shape := &ImgShape{
@@ -104,7 +105,6 @@ func (m *Media) Squarize(t *sync.Transport, b float64) (length float64) {
 }
 
 func (m *Media) Pattern(t *sync.Transport) {
-	log.Println("Tempo is now", (<-t.Status).Bpm)
 	b := m.BarsTotal(t.BeatDur(), t.TimeSignature.Measure)
 	if b > 4.0 {
 		m.P = b
@@ -120,6 +120,7 @@ func (m *Media) Position(t *sync.Transport) float64 {
 	st := <-t.Status
 
 	if st.D {
+		log.Println("Tempo is now", (<-t.Status).Bpm)
 		m.Pattern(t)
 	}
 	phase := math.Mod(st.Beat, m.P) / m.P

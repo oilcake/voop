@@ -98,8 +98,14 @@ play:
 		case getKey('-'):
 			media.Multiple = media.Multiple * 2.0
 			media.Pattern(p.Transport)
+		case getKey('_'):
+			media.Multiple = media.Multiple * 1.5
+			media.Pattern(p.Transport)
 		case getKey('='):
 			media.Multiple = media.Multiple / 2.0
+			media.Pattern(p.Transport)
+		case getKey('+'):
+			media.Multiple = media.Multiple / 1.5
 			media.Pattern(p.Transport)
 		case getKey('0'):
 			media.Multiple = 1.0
