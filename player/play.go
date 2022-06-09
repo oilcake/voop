@@ -32,6 +32,8 @@ func PlaySet(p *Player, n Navigator) {
 			n.Next()
 		case "prev":
 			n.Previous()
+		case "stop":
+			return
 		}
 	}
 
@@ -54,7 +56,11 @@ play:
 			p.Window.IMShow(img)
 		}
 		v := p.Window.WaitKey(1)
+		log.Println("key pressed ", v)
 		switch v {
+		case 27:
+			action = "stop"
+			break play
 		case getKey('-'):
 			media.Multiple = media.Multiple * 2.0
 			media.Pattern(p.Transport)
