@@ -6,6 +6,7 @@ import (
 	"log"
 	_ "net/http/pprof"
 	"time"
+	"voop/library"
 	"voop/player"
 	"voop/sync"
 )
@@ -33,12 +34,12 @@ func main() {
 	fmt.Println(*folder)
 
 	// preload a bunch of files
-	set, err := player.NewSet(folder, t)
+	set, err := library.NewSet(folder, t)
 	if err != nil {
 		log.Fatal("cannot preload folder", err)
 	}
 	// (don't forget to close everything)
-	defer player.CloseSet(set)
+	defer library.CloseSet(set)
 
 	// and play it forever
 	player.PlaySet(&p, set)

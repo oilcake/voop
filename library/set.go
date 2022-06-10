@@ -1,38 +1,39 @@
-package player
+package library
 
 import (
-	"io/fs"
 	"io/ioutil"
 	"log"
-	"math/rand"
 	"path/filepath"
+	"voop/clip"
 	"voop/sync"
 )
 
-var (
-	SupportedTypes = [...]string{".mp4", ".mpg", ".mov", ".avi", ".wmv", ".mkv"}
-)
-
 type Set struct {
-	RightNow int
-	Size     int
-	Kit      []*Media
+	Read
+	Kit []*clip.Media
+}
+
+func (s *Set) What(i int) interface{} {
+	return s.Kit[i]
 }
 
 func NewSet(path *string, t *sync.Transport) (*Set, error) {
 	files := SupportedFilesFrom(path)
-	opened := make([]*Media, len(files))
+	opened := make([]*clip.Media, len(files))
 	var err error
 	for i, file := range files {
-		opened[i], err = NewMedia(file, t)
+		log.Printf("Index of file being opened %v\n", i)
+		opened[i], err = clip.NewMedia(file, t)
 		if err != nil {
-			return nil, err
+			// return nil, err
+			log.Printf("\nWarning\n %#v", err)
 		}
 	}
-	set := &Set{
+	set := &Set{Read{
 		RightNow: 0,
 		Size:     len(opened),
-		Kit:      opened,
+	},
+		opened,
 	}
 	return set, nil
 }
@@ -42,25 +43,6 @@ func CloseSet(s *Set) {
 		log.Println("\nclosing file ", clip.Name)
 		clip.Close()
 	}
-}
-
-// Navigation
-func (s *Set) Now() *Media {
-	return s.Kit[s.RightNow]
-}
-
-func (s *Set) Random() {
-	s.RightNow = rand.Intn(s.Size - 1)
-}
-
-func (s *Set) Next() {
-	s.RightNow = (s.RightNow + 1) % s.Size
-}
-
-func (s *Set) Previous() {
-	m := s.Size - s.RightNow
-	m = m % s.Size
-	s.RightNow = s.Size - m - 1
 }
 
 // Handy functions
@@ -103,18 +85,4 @@ func Supported(file string) bool {
 		}
 	}
 	return false
-}
-
-func LookIn(s string, d fs.DirEntry, err error) error {
-	if err != nil {
-		return err
-	}
-	if !d.IsDir() {
-		println(s)
-	}
-	return nil
-}
-
-func RecursiveLook() {
-	filepath.WalkDir("..", LookIn)
 }

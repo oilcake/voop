@@ -6,32 +6,40 @@ import (
 	"log"
 	"math/rand"
 	"time"
+	"voop/clip"
 
 	"gocv.io/x/gocv"
 )
 
+// type Unit[T any] T
+
 // Play functions
-type Navigator interface {
-	Now() *Media
+type Reader interface {
+	Now() int
 	Random()
 	Next()
 	Previous()
+	What(index int) interface{}
 }
 
-func PlaySet(p *Player, n Navigator) {
+func PlaySet(p *Player, r Reader) {
 
 	for {
 		// play media
-		media := n.Now()
+		element := r.What(r.Now())
+		media, ok := element.(*clip.Media)
+		if !ok {
+			log.Fatal("type conversion failed")
+		}
 		action := PlayMedia(media, p) // until any keyboard action
 		fmt.Println(action)
 		switch action {
 		case "rnd":
-			n.Random()
+			r.Random()
 		case "next":
-			n.Next()
+			r.Next()
 		case "prev":
-			n.Previous()
+			r.Previous()
 		case "stop":
 			return
 		}
@@ -39,7 +47,7 @@ func PlaySet(p *Player, n Navigator) {
 
 }
 
-func PlayMedia(media *Media, p *Player) (action string) {
+func PlayMedia(media *clip.Media, p *Player) (action string) {
 	// who is it
 	log.Println("\nplaying file", media.Name)
 	// and play it in cycle forever
