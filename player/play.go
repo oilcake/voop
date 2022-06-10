@@ -7,6 +7,7 @@ import (
 	"math/rand"
 	"time"
 	"voop/clip"
+	"voop/library"
 
 	"gocv.io/x/gocv"
 )
@@ -22,16 +23,23 @@ type Reader interface {
 	What(index int) interface{}
 }
 
-func PlaySet(p *Player, r Reader) {
-
+func PlayLibrary(p *Player, r Reader) {
 	for {
-		// play media
+		// choose folder
 		element := r.What(r.Now())
-		media, ok := element.(*clip.Media)
+		path, ok := element.(*string)
 		if !ok {
 			log.Fatal("type conversion failed")
 		}
-		action := PlayMedia(media, p) // until any keyboard action
+		// preload set from folder
+		set, err := library.NewSet(path, p.Transport)
+		if err != nil {
+			log.Fatal("cannot preload folder", err)
+		}
+		// (don't forget to close everything)
+		defer library.CloseSet(set)
+
+		action := PlaySet(p, set)
 		fmt.Println(action)
 		switch action {
 		case "rnd":
@@ -42,6 +50,36 @@ func PlaySet(p *Player, r Reader) {
 			r.Previous()
 		case "stop":
 			return
+		}
+	}
+}
+
+func PlaySet(p *Player, r Reader) (action string) {
+
+	for {
+		// play media
+		element := r.What(r.Now())
+		media, ok := element.(*clip.Media)
+		if !ok {
+			log.Fatal("type conversion failed")
+		}
+		action = PlayMedia(media, p) // until any keyboard action
+		fmt.Println(action)
+		switch action {
+		case "rnd":
+			r.Random()
+		case "next":
+			r.Next()
+		case "prev":
+			r.Previous()
+		case "stop":
+			return
+		case "nextChapter":
+			return "next"
+		case "prevChapter":
+			return "prev"
+		case "randomChapter":
+			return "rnd"
 		}
 	}
 
@@ -65,9 +103,16 @@ play:
 		}
 		v := p.Window.WaitKey(1)
 		switch v {
+		// quit
 		case 27:
 			action = "stop"
 			break play
+		// fullscreen
+		case getKey('f'):
+			p.Window.SetWindowProperty(gocv.WindowPropertyFullscreen, gocv.WindowFullscreen)
+		case getKey('g'):
+			p.Window.SetWindowProperty(gocv.WindowPropertyFullscreen, gocv.WindowNormal)
+		// ratio
 		case getKey('-'):
 			media.Multiple = media.Multiple * 2.0
 			media.Pattern(p.Transport)
@@ -83,6 +128,7 @@ play:
 		case getKey('0'):
 			media.Multiple = 1.0
 			media.Pattern(p.Transport)
+		// clip navigation
 		case getKey('/'):
 			action = "rnd"
 			break play
@@ -92,10 +138,16 @@ play:
 		case getKey(','):
 			action = "prev"
 			break play
-		case getKey('f'):
-			p.Window.SetWindowProperty(gocv.WindowPropertyFullscreen, gocv.WindowFullscreen)
-		case getKey('g'):
-			p.Window.SetWindowProperty(gocv.WindowPropertyFullscreen, gocv.WindowNormal)
+		// folder navigation
+		case getKey('§'):
+			action = "randomChapter"
+			break play
+		case getKey(']'):
+			action = "nextChapter"
+			break play
+		case getKey('['):
+			action = "prevChapter"
+			break play
 		}
 	}
 	return

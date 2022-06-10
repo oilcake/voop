@@ -34,15 +34,13 @@ func main() {
 	fmt.Println(*folder)
 
 	// preload a bunch of files
-	set, err := library.NewSet(folder, t)
+	lib, err := library.NewLibrary(folder, t)
 	if err != nil {
-		log.Fatal("cannot preload folder", err)
+		log.Fatal("cannot preload library", err)
 	}
-	// (don't forget to close everything)
-	defer library.CloseSet(set)
 
 	// and play it forever
-	player.PlaySet(&p, set)
+	player.PlayLibrary(&p, lib)
 
 	// Bye
 	log.Println("closing files")
