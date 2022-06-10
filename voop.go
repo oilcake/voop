@@ -14,6 +14,7 @@ import (
 func main() {
 	// initialize clock
 	clock := sync.NewClock(40 * time.Millisecond)
+	defer close(clock.Trigger)
 
 	// initialize transport
 	t, err := sync.NewTransport()
@@ -43,5 +44,5 @@ func main() {
 	player.PlayLibrary(&p, lib)
 
 	// Bye
-	log.Println("closing files")
+	log.Println("ciao")
 }
