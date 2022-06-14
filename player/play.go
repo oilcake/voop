@@ -36,11 +36,11 @@ func PlayLibrary(p *Player, r Reader) {
 		if err != nil {
 			log.Fatal("cannot preload folder", err)
 		}
-		// (don't forget to close everything)
-		defer library.CloseSet(set)
 
 		action := PlaySet(p, set)
 		fmt.Println(action)
+		// (don't forget to close everything)
+		library.CloseSet(set)
 		switch action {
 		case "rnd":
 			r.Random()
