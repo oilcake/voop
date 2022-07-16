@@ -19,40 +19,6 @@ func NewConnection() (conn net.Conn) {
 	return
 }
 
-func NewLink(st chan Status) {
-	var (
-		response *string
-		err      error
-		watch    Status
-		oldTempo float32
-		newTempo float32
-	)
-	watch.Bpm = 0.0
-	// start Ableton Link watcher
-	conn := NewConnection()
-	go func() {
-		for {
-			oldTempo = watch.Bpm
-			response, err = Ping(conn, "status")
-			if err != nil {
-				log.Fatal("no response from Carabiner", err)
-			}
-			err = Parse(response, &watch)
-			if err != nil {
-				log.Fatal("Parsing error", err)
-			}
-			newTempo = watch.Bpm
-			if oldTempo != newTempo {
-				watch.D = true
-				oldTempo = newTempo
-			}
-			st <- watch
-			watch.D = false
-		}
-	}()
-
-}
-
 func Parse(message *string, st *Status) error {
 	err := edn.Unmarshal([]byte(*message), st)
 	return err

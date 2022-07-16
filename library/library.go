@@ -5,8 +5,6 @@ import (
 	"voop/sync"
 )
 
-// type Folder string
-
 type Library struct {
 	Read
 	Index []*string
