@@ -119,9 +119,12 @@ func (m *Media) Pattern(t *sync.Transport) {
 func (m *Media) Position(t *sync.Transport) float64 {
 	st := <-t.Status
 
-	if st.D {
+	select {
+	case <-t.TempoWatcher:
 		log.Println("Tempo is now", (<-t.Status).Bpm)
 		m.Pattern(t)
+	default:
+		// pass
 	}
 	phase := math.Mod(st.Beat, m.P) / m.P
 	return phase

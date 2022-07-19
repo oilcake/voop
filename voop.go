@@ -41,6 +41,11 @@ func main() {
 	// initialize clock
 	clock := sync.NewClock(gap)
 
+	// start Carabiner
+	crb := sync.NewCarabiner()
+
+	fmt.Println(crb)
+
 	clock.Start()
 	for range clock.Trigger {
 		select {

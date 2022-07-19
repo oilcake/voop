@@ -16,14 +16,6 @@ func (p *Player) Play(f Frame) {
 	// play:
 	for status := range p.Transport.Status {
 		log.Println("Play")
-		// select {
-		// case <-stop:
-		// 	return
-		// default:
-		// 	// pass
-		// }
-		// log.Println("stop player")
-		// return
 		// calculate a playing phase
 		ph := p.Media.Position(p.Transport)
 		fmt.Printf("\rCurrent beat is %.9f and phase is %.9f", status.Beat, ph)
