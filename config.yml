@@ -1,0 +1,26 @@
+types:
+  -supported:
+    -".mp4"
+    -".mpg"
+    -".mov"
+    -".avi"
+    -".wmv"
+    -".mkv
+    -".txt"
+  -unsupported:
+
+# watch out - syntax is slightly different than above
+shortcuts:
+  clip: # file level navigaton
+    next: "." # can also include joystick or osc fields
+    previous: ","
+    random: "/"
+    rate_double: "="
+    rate_half: "-"
+    rate_1.5: "+"
+    rate_0.75: "_"
+    rate_default: "0"
+  kit:
+    next: "]" # can also include joystick or osc fields
+    previous: "["
+    random: "§"

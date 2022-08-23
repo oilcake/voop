@@ -6,12 +6,16 @@ import (
 	"log"
 	_ "net/http/pprof"
 	"time"
+	"voop/config"
 	"voop/library"
 	"voop/player"
 	"voop/sync"
 )
 
 func main() {
+	// read config and get an actions map
+	k := config.ReadConfig()
+	fmt.Println(k)
 	// initialize clock
 	clock := sync.NewClock(40 * time.Millisecond)
 	defer close(clock.Trigger)
