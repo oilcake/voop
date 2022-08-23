@@ -31,3 +31,7 @@ func (r *Read) Previous() {
 	m = m % r.Size
 	r.RightNow = r.Size - m - 1
 }
+
+func (r *Read) Default() {
+	r.RightNow = 0
+}

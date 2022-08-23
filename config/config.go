@@ -11,7 +11,6 @@ import (
 type Action struct {
 	Command string
 	Target  string
-	Func    func()
 }
 
 // keyboard is a set of actions grouped by keys
