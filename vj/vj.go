@@ -25,7 +25,8 @@ func (vj *VJ) OpenLibrary(folder *string) {
 	vj.Lib = lib
 }
 
-func (vj *VJ) LoadSet() {
+func (vj *VJ) LoadSet(f func()) {
+	f()
 	path, ok := vj.Lib.What(vj.Lib.Now()).(*string)
 	if !ok {
 		log.Fatal("type conversion failed")
@@ -47,11 +48,31 @@ func (vj *VJ) ChooseMedia(f func()) {
 	vj.Player.Media = media
 }
 
+func (vj *VJ) OpenRndMediaParallel() {
+	go func() {
+		path, ok := vj.Lib.What(vj.Lib.Now()).(*string)
+		if !ok {
+			log.Fatal("type conversion failed")
+		}
+		file, _ := player.ChooseRandomFile(path)
+		vj.Player.Media, _ = clip.NewMedia(file, vj.Player.Transport)
+	}()
+}
+
 func (vj *VJ) WaitForAction() {
 	for key := range vj.Player.HotKey {
 		switch key {
 		case 47:
 			vj.ChooseMedia(vj.Set.Read.Random)
+		case 93:
+			go func() {
+				vj.Set.Close()
+				vj.LoadSet(vj.Lib.Read.Next)
+				vj.ChooseMedia(vj.Set.Read.Default)
+			}()
+		case 96:
+			vj.Lib.Read.Random()
+			vj.OpenRndMediaParallel()
 		}
 		fmt.Println()
 		fmt.Println(key)

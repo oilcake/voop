@@ -43,7 +43,7 @@ func main() {
 	// preload a bunch of files
 	vj.OpenLibrary(folder)
 	// Load Set
-	vj.LoadSet()
+	vj.LoadSet(vj.Lib.Default)
 	// load media
 	vj.ChooseMedia(vj.Set.Default)
 	// listen for key presses

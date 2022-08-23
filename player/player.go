@@ -39,7 +39,3 @@ play:
 		}
 	}
 }
-
-func (p *Player) MediaFromSet() {
-
-}

@@ -38,7 +38,7 @@ func NewSet(path *string, t *sync.Transport) (*Set, error) {
 	return set, nil
 }
 
-func CloseSet(s *Set) {
+func (s *Set) Close() {
 	for _, clip := range s.Kit {
 		log.Println("\nclosing file ", clip.Name)
 		clip.Close()

@@ -2,7 +2,6 @@ package player
 
 import (
 	"fmt"
-	"io/ioutil"
 	"log"
 	"math/rand"
 	"time"
@@ -40,7 +39,7 @@ func PlayLibrary(p *Player, r Reader) {
 		action := PlaySet(p, set)
 		fmt.Println(action)
 		// (don't forget to close everything)
-		library.CloseSet(set)
+		// library.CloseSet(set)
 		switch action {
 		case "rnd":
 			r.Random()
@@ -155,13 +154,13 @@ play:
 
 func ChooseRandomFile(path *string) (string, error) {
 
-	files, err := ioutil.ReadDir(*path)
-	if err != nil {
-		return "", err
-	}
+	files := library.SupportedFilesFrom(path)
+	// if err != nil {
+	//     return "", err
+	// }
 	log.Println("files total", len(files))
 	rand.Seed(time.Now().UnixNano())
-	file := *path + "/" + files[rand.Intn(len(files)-1)].Name()
+	file := files[rand.Intn(len(files)-1)]
 	fmt.Println()
 	log.Printf("Playing file %v\n", file)
 	return file, nil
