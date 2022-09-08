@@ -1,7 +1,6 @@
 package vj
 
 import (
-	"fmt"
 	"log"
 	"voop/clip"
 	"voop/config"
@@ -61,21 +60,6 @@ func (vj *VJ) OpenRndMediaParallel() {
 
 func (vj *VJ) WaitForAction() {
 	for key := range vj.Player.HotKey {
-		switch key {
-		case 47:
-			vj.ChooseMedia(vj.Set.Read.Random)
-		case 93:
-			go func() {
-				vj.Set.Close()
-				vj.LoadSet(vj.Lib.Read.Next)
-				vj.ChooseMedia(vj.Set.Read.Default)
-			}()
-		case 96:
-			vj.Lib.Read.Random()
-			vj.OpenRndMediaParallel()
-		}
-		fmt.Println()
-		fmt.Println(key)
-		fmt.Println(vj.Config[key])
+		vj.Action(key)
 	}
 }
