@@ -54,5 +54,6 @@ func main() {
 	vj.Player.PlayMedia()
 
 	// Bye
+	log.Println()
 	log.Println("ciao")
 }

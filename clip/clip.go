@@ -70,19 +70,25 @@ func NewMedia(filename string, t *sync.Transport) (m *Media, err error) {
 }
 
 func (m *Media) Frame(phase float64) gocv.Mat {
-	// find frame
+	// find number of frame
 	f := phase * m.Framecount
 	// rewind
 	m.V.Set(gocv.VideoCapturePosFrames, f)
-	// read video frame
+	// read it
 	m.V.Read(m.F)
 	if m.F.Empty() {
 		log.Fatal("Unable to read VideoCaptureFile")
 	}
-	// resize frame
+	// resize
 	scaledSize := image.Point{clipWidth, int(math.Round(clipWidth / m.Shape.AspRt))}
-	gocv.Resize(*m.F, m.F, scaledSize, 0.0, 0.0, gocv.InterpolationDefault)
+	m.F = Resize(m.F, scaledSize)
 	return *m.F
+}
+
+func Resize(frame *gocv.Mat, size image.Point) *gocv.Mat {
+
+	gocv.Resize(*frame, frame, size, 0.0, 0.0, gocv.InterpolationDefault)
+	return frame
 }
 
 func (m *Media) BarsTotal(BeatDuration float64, Measure uint8) (f float64) {
