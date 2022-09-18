@@ -2,26 +2,25 @@ package vj
 
 import "fmt"
 
-func (vj *VJ) Action(key int) {
+var key string
+
+func (vj *VJ) Action(ascii int) {
+	key = string(rune(ascii))
 	switch key {
-	case getKey('/'):
+	case "/":
 		vj.ChooseMedia(vj.Set.Read.Random)
-	case getKey(']'):
+	case "]":
 		go func() {
 			vj.Set.Close()
 			vj.LoadSet(vj.Lib.Read.Next)
 			vj.ChooseMedia(vj.Set.Read.Default)
 		}()
-	case getKey('`'):
+	case "`":
 		vj.Lib.Read.Random()
 		vj.OpenRndMediaParallel()
 	}
 	fmt.Println()
 	fmt.Println(key)
-	fmt.Println(vj.Config[key])
+	fmt.Println(vj.Config[ascii])
 
-}
-
-func getKey(r rune) int {
-	return int(r)
 }
