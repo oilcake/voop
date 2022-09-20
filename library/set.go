@@ -4,12 +4,11 @@ import (
 	"io/ioutil"
 	"log"
 	"path/filepath"
-	"voop/clip"
-	"voop/sync"
 )
 
+/*
 type Set struct {
-	Read
+	read
 	Kit []*clip.Media
 }
 
@@ -17,7 +16,7 @@ func (s *Set) What(i int) interface{} {
 	return s.Kit[i]
 }
 
-func NewSet(path *string, t *sync.Transport) (*Set, error) {
+func NewSet(path string, t *sync.Transport) (*Set, error) {
 	files := SupportedFilesFrom(path)
 	opened := make([]*clip.Media, len(files))
 	var err error
@@ -29,7 +28,7 @@ func NewSet(path *string, t *sync.Transport) (*Set, error) {
 			log.Printf("\nWarning\n %#v", err)
 		}
 	}
-	set := &Set{Read{
+	set := &Set{read{
 		RightNow: 0,
 		Size:     len(opened),
 	},
@@ -44,9 +43,10 @@ func (s *Set) Close() {
 		clip.Close()
 	}
 }
+*/
 
 // Handy functions
-func SupportedFilesFrom(path *string) (sf []string) {
+func SupportedFilesFrom(path string) (sf []string) {
 	sf = make([]string, 0)
 	if err := AddFiles(&sf, path); err != nil {
 		log.Fatal("can't open folder", err)
@@ -55,20 +55,20 @@ func SupportedFilesFrom(path *string) (sf []string) {
 	return
 }
 
-func AddFiles(sf *[]string, path *string) error {
-	files, err := ioutil.ReadDir(*path)
+func AddFiles(sf *[]string, path string) error {
+	files, err := ioutil.ReadDir(path)
 	if err != nil {
 		return err
 	}
 
 	for _, file := range files {
 		if Supported(file.Name()) {
-			f := *path + "/" + file.Name()
+			f := path + "/" + file.Name()
 			*sf = append(*sf, f)
 		}
 		if file.IsDir() {
-			fp := *path + "/" + file.Name()
-			err = AddFiles(sf, &fp)
+			fp := path + "/" + file.Name()
+			err = AddFiles(sf, fp)
 			if err != nil {
 				return err
 			}

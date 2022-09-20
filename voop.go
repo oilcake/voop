@@ -42,15 +42,10 @@ func main() {
 	vj := vj.VJ{Player: p, Config: *k}
 	// preload a bunch of files
 	vj.OpenLibrary(folder)
-	// Load Set
-	vj.LoadSet(vj.Lib.Default)
-	// load media
-	vj.ChooseMedia(vj.Set.Default)
 	// listen for key presses
 	go vj.WaitForAction()
 
 	// and play it forever
-	// player.PlayLibrary(&p, lib)
 	vj.Player.PlayMedia()
 
 	// Bye

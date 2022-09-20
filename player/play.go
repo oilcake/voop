@@ -17,7 +17,7 @@ type Reader interface {
 	What(index int) interface{}
 }
 
-func ChooseRandomFile(path *string) (string, error) {
+func ChooseRandomFile(path string) (string, error) {
 
 	files := library.SupportedFilesFrom(path)
 	log.Println("files total", len(files))

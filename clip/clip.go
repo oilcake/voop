@@ -2,6 +2,7 @@ package clip
 
 import (
 	"errors"
+	"fmt"
 	"image"
 	"log"
 	"math"
@@ -33,6 +34,8 @@ type Media struct {
 }
 
 func NewMedia(filename string, t *sync.Transport) (m *Media, err error) {
+	fmt.Println()
+	log.Println("opening ", filename)
 	// open file
 	clip, err := gocv.VideoCaptureFile(filename)
 	if !clip.IsOpened() {
