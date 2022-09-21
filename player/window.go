@@ -23,3 +23,7 @@ func NewWindow(name string) *Window {
 	window.ResizeWindow(100, 100)
 	return &Window{window}
 }
+
+func (w *Window) Fullscreen() {
+	w.Window.SetWindowProperty(gocv.WindowPropertyFullscreen, gocv.WindowFullscreen)
+}

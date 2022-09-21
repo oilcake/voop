@@ -6,6 +6,8 @@ import (
 	"image"
 	"log"
 	"math"
+	"math/rand"
+	"time"
 
 	"voop/sync"
 
@@ -15,7 +17,7 @@ import (
 var phase float64
 
 const (
-	clipWidth = 1000.0
+	clipWidth = 1440.0
 )
 
 type ImgShape struct {
@@ -121,6 +123,10 @@ func (m *Media) Swap() {
 	m.offset = m.phase - m.alteredPhase
 }
 
+func (m *Media) Jump() {
+	rand.Seed(time.Now().UnixNano())
+	m.offset = rand.Float64()
+}
 func (m *Media) Frame(phase float64) gocv.Mat {
 	m.phase = phase
 	// find number of frame

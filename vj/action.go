@@ -49,11 +49,15 @@ func (vj *VJ) Action(ascii int) {
 	// Direction
 	case "o":
 		vj.Player.Media.Swap()
-		fmt.Println()
-		fmt.Println("Fucking Swap!")
+	// Jump!
+	case "j":
+		vj.Player.Media.Jump()
 	// palindrome
 	case "p":
 		vj.Player.Media.PalindromemordnilaP(vj.Player.Transport)
+	// Fullscreen
+	case "f":
+		vj.Player.Window.Fullscreen()
 	}
 	// debug info
 	fmt.Println()
