@@ -46,6 +46,9 @@ func (vj *VJ) Action(ascii int) {
 	case "+":
 		vj.Player.Media.Multiple = vj.Player.Media.Multiple * 0.75
 		vj.Player.Media.Grooverize(vj.Player.Transport)
+	// Zero
+	case "r":
+		vj.Player.Media.Zero()
 	// Direction
 	case "o":
 		vj.Player.Media.Swap()

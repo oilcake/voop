@@ -1,7 +1,6 @@
 package player
 
 import (
-	"fmt"
 	"log"
 	"math"
 	"voop/clip"
@@ -48,7 +47,7 @@ play:
 		}
 		// calculate a playing phase
 		ph := p.LoopPhase()
-		fmt.Printf("\rCurrent beat is %.9f and phase is %.9f", (<-p.Transport.Status).Beat, ph)
+		// fmt.Printf("\rCurrent beat is %.9f and phase is %.9f", (<-p.Transport.Status).Beat, ph)
 		// to retrieve specific frame
 		img := p.Media.Frame(ph)
 		// and display it

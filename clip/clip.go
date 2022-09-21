@@ -14,10 +14,8 @@ import (
 	"gocv.io/x/gocv"
 )
 
-var phase float64
-
 const (
-	clipWidth = 1440.0
+	clipWidth = 400.0
 )
 
 type ImgShape struct {
@@ -40,6 +38,9 @@ type Media struct {
 	phase        float64
 	alteredPhase float64
 	offset       float64
+	shiftedPhase float64
+	antiphase    float64
+	timepoint    float64
 }
 
 func NewMedia(filename string, t *sync.Transport) (m *Media, err error) {
@@ -81,6 +82,7 @@ func NewMedia(filename string, t *sync.Transport) (m *Media, err error) {
 		offset:       0,
 		phase:        0,
 		alteredPhase: 0,
+		shiftedPhase: 0,
 	}
 	media.Grooverize(t)
 	return media, nil
@@ -99,28 +101,43 @@ func (m *Media) PalindromemordnilaP(t *sync.Transport) {
 	}
 }
 
+func PositiveMod(m, n float64) float64 {
+	return math.Mod(math.Mod(m, n)+n, n)
+}
+
 func (m *Media) calcFrame() (frame float64) {
+	m.antiphase = -m.phase
 	switch {
 	case m.palindrome:
-		phase = m.phase*2.0 - 1.0
-		frame = m.Framecount * math.Abs(phase)
+		m.phase = m.phase*2.0 - 1.0
+		frame = m.Framecount * math.Abs(m.phase)
+		break
 	case m.forward:
-		m.alteredPhase = m.phase - m.offset + 3
-		m.alteredPhase = math.Mod(m.alteredPhase, 1.0)
-		frame = m.Framecount * m.alteredPhase
+		m.shiftedPhase = m.phase - m.offset + m.timepoint
+		m.shiftedPhase = PositiveMod(m.shiftedPhase, 1.0)
+		frame = m.Framecount * m.shiftedPhase
+		break
 	case !m.forward:
-		off := m.offset + 3
-		phaseRev := off - (m.phase - m.offset)
-		m.alteredPhase = math.Mod(phaseRev, 1.0)
-		frame = m.Framecount * m.alteredPhase
+		m.antiphase += m.offset
+		m.shiftedPhase = m.timepoint + m.antiphase
+		m.shiftedPhase = PositiveMod(m.shiftedPhase, 1.0)
+		frame = m.Framecount * m.shiftedPhase
+		break
 	}
-	fmt.Printf("\rCurrent frame is %.9f ", frame)
+	fmt.Printf("\rCurrent frame %06d, phase %.2f, offset %.2f, shiftedPhase %.2f, alteredPhase %.2f",
+		int(frame), m.phase, m.offset, m.shiftedPhase, m.alteredPhase)
 	return
 }
 
 func (m *Media) Swap() {
 	m.forward = !m.forward
-	m.offset = m.phase - m.alteredPhase
+	m.timepoint = m.shiftedPhase
+	m.offset = m.phase
+}
+
+func (m *Media) Zero() {
+	m.offset = m.phase
+	m.timepoint = 0
 }
 
 func (m *Media) Jump() {
