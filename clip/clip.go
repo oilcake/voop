@@ -12,6 +12,8 @@ import (
 	"gocv.io/x/gocv"
 )
 
+var phase float64
+
 const (
 	clipWidth = 1000.0
 )
@@ -23,14 +25,19 @@ type ImgShape struct {
 }
 
 type Media struct {
-	Name       string
-	V          *gocv.VideoCapture
-	Duration   float64
-	Framecount float64
-	F          *gocv.Mat //this is a current frame object
-	LoopLen    float64   // Media pattern's length
-	Shape      *ImgShape
-	Multiple   float64
+	Name         string
+	V            *gocv.VideoCapture
+	Duration     float64
+	Framecount   float64
+	F            *gocv.Mat //this is a current frame object
+	LoopLen      float64   // Media pattern's length
+	Shape        *ImgShape
+	Multiple     float64
+	forward      bool
+	palindrome   bool
+	phase        float64
+	alteredPhase float64
+	offset       float64
 }
 
 func NewMedia(filename string, t *sync.Transport) (m *Media, err error) {
@@ -59,22 +66,65 @@ func NewMedia(filename string, t *sync.Transport) (m *Media, err error) {
 
 	f := gocv.NewMat()
 	media := &Media{
-		Name:       filename,
-		V:          clip,
-		Duration:   msDur,
-		Framecount: framecount,
-		F:          &f,
-		LoopLen:    0.0,
-		Shape:      shape,
-		Multiple:   1.0,
+		Name:         filename,
+		V:            clip,
+		Duration:     msDur,
+		Framecount:   framecount,
+		F:            &f,
+		LoopLen:      0.0,
+		Shape:        shape,
+		Multiple:     1.0,
+		forward:      true,
+		palindrome:   false,
+		offset:       0,
+		phase:        0,
+		alteredPhase: 0,
 	}
 	media.Grooverize(t)
 	return media, nil
 }
 
+func (m *Media) PalindromemordnilaP(t *sync.Transport) {
+	switch {
+	case !m.palindrome:
+		m.Multiple = m.Multiple * 2.0
+		m.palindrome = true
+		m.Grooverize(t)
+	case m.palindrome:
+		m.Multiple = m.Multiple * 0.5
+		m.palindrome = false
+		m.Grooverize(t)
+	}
+}
+
+func (m *Media) calcFrame() (frame float64) {
+	switch {
+	case m.palindrome:
+		phase = m.phase*2.0 - 1.0
+		frame = m.Framecount * math.Abs(phase)
+	case m.forward:
+		m.alteredPhase = m.phase - m.offset + 3
+		m.alteredPhase = math.Mod(m.alteredPhase, 1.0)
+		frame = m.Framecount * m.alteredPhase
+	case !m.forward:
+		off := m.offset + 3
+		phaseRev := off - (m.phase - m.offset)
+		m.alteredPhase = math.Mod(phaseRev, 1.0)
+		frame = m.Framecount * m.alteredPhase
+	}
+	fmt.Printf("\rCurrent frame is %.9f ", frame)
+	return
+}
+
+func (m *Media) Swap() {
+	m.forward = !m.forward
+	m.offset = m.phase - m.alteredPhase
+}
+
 func (m *Media) Frame(phase float64) gocv.Mat {
+	m.phase = phase
 	// find number of frame
-	f := phase * m.Framecount
+	f := m.calcFrame()
 	// rewind
 	m.V.Set(gocv.VideoCapturePosFrames, f)
 	// read it
@@ -126,9 +176,11 @@ func (m *Media) Grooverize(t *sync.Transport) {
 	}
 	m.LoopLen = m.LoopLen * float64(t.TimeSignature.Measure) * m.Multiple
 	log.Println("pattern", m.LoopLen)
-
 }
 
+func (m *Media) UpdateRate() {
+
+}
 func (m *Media) Close() {
 	m.V.Close()
 	m.F.Close()
