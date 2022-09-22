@@ -15,7 +15,7 @@ import (
 )
 
 const (
-	clipWidth = 400.0
+	clipWidth = 900.0
 )
 
 type ImgShape struct {
@@ -89,6 +89,8 @@ func NewMedia(filename string, t *sync.Transport) (m *Media, err error) {
 }
 
 func (m *Media) PalindromemordnilaP(t *sync.Transport) {
+	m.offset = m.phase
+	m.timepoint = m.shiftedPhase
 	switch {
 	case !m.palindrome:
 		m.Multiple = m.Multiple * 2.0
@@ -101,7 +103,8 @@ func (m *Media) PalindromemordnilaP(t *sync.Transport) {
 	}
 }
 
-func PositiveMod(m, n float64) float64 {
+// this function calculates positive remainder from division to 1
+func Wrap(m, n float64) float64 {
 	return math.Mod(math.Mod(m, n)+n, n)
 }
 
@@ -109,21 +112,19 @@ func (m *Media) calcFrame() (frame float64) {
 	m.antiphase = -m.phase
 	switch {
 	case m.palindrome:
-		m.phase = m.phase*2.0 - 1.0
-		frame = m.Framecount * math.Abs(m.phase)
+		m.shiftedPhase = 1 - math.Abs(Wrap((m.phase-m.offset+m.timepoint)*2.0, 2)-1.0)
 		break
 	case m.forward:
-		m.shiftedPhase = m.phase - m.offset + m.timepoint
-		m.shiftedPhase = PositiveMod(m.shiftedPhase, 1.0)
+		m.shiftedPhase = Wrap(m.phase-m.offset+m.timepoint, 1)
 		frame = m.Framecount * m.shiftedPhase
 		break
 	case !m.forward:
 		m.antiphase += m.offset
-		m.shiftedPhase = m.timepoint + m.antiphase
-		m.shiftedPhase = PositiveMod(m.shiftedPhase, 1.0)
+		m.shiftedPhase = Wrap(m.timepoint+m.antiphase, 1)
 		frame = m.Framecount * m.shiftedPhase
 		break
 	}
+	frame = m.Framecount * m.shiftedPhase
 	fmt.Printf("\rCurrent frame %06d, phase %.2f, offset %.2f, shiftedPhase %.2f, alteredPhase %.2f",
 		int(frame), m.phase, m.offset, m.shiftedPhase, m.alteredPhase)
 	return
