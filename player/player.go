@@ -2,7 +2,6 @@ package player
 
 import (
 	"log"
-	"math"
 	"voop/clip"
 	"voop/sync"
 )
@@ -21,17 +20,6 @@ type Player struct {
 	HotKey chan int
 }
 
-func (p *Player) LoopPhase() float64 {
-	st := <-p.Transport.Status
-
-	if st.D {
-		log.Println("Tempo is now", (<-p.Transport.Status).Bpm)
-		p.Media.Grooverize(p.Transport)
-	}
-	phase := math.Mod(st.Beat, p.Media.LoopLen) / p.Media.LoopLen
-	return phase
-}
-
 func (p *Player) PlayMedia() {
 	p.HotKey = make(chan int)
 	mNext = make(chan *clip.Media)
@@ -46,7 +34,7 @@ play:
 			// pass
 		}
 		// calculate a playing phase
-		ph := p.LoopPhase()
+		ph := p.LoopPhase(p.Transport)
 		// fmt.Printf("\rCurrent beat is %.9f and phase is %.9f", (<-p.Transport.Status).Beat, ph)
 		// to retrieve specific frame
 		img := p.Media.Frame(ph)

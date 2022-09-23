@@ -2,11 +2,23 @@ package clip
 
 import (
 	"fmt"
+	"log"
 	"math"
 	"math/rand"
 	"time"
 	"voop/sync"
 )
+
+func (m *Media) LoopPhase(t *sync.Transport) float64 {
+	st := <-t.Status
+
+	if st.D {
+		log.Println("Tempo is now", st.Bpm)
+		m.Grooverize(t)
+	}
+	phase := math.Mod(st.Beat, m.LoopLen) / m.LoopLen
+	return phase
+}
 
 func (m *Media) PalindromemordnilaP(t *sync.Transport) {
 	m.palindrome = !m.palindrome
@@ -37,8 +49,7 @@ func (m *Media) calcFrame() (frame float64) {
 		m.shiftedPhase = m.phase - m.offset
 		break
 	case false:
-		m.antiphase += m.offset
-		m.shiftedPhase = m.antiphase
+		m.shiftedPhase = m.antiphase + m.offset
 		break
 	}
 	// check palindromicity
