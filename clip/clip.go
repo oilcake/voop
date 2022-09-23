@@ -6,8 +6,6 @@ import (
 	"image"
 	"log"
 	"math"
-	"math/rand"
-	"time"
 
 	"voop/sync"
 
@@ -15,7 +13,11 @@ import (
 )
 
 const (
-	clipWidth = 900.0
+	clipWidth = 1200.0
+)
+
+var (
+	shift, dir float64
 )
 
 type ImgShape struct {
@@ -36,7 +38,7 @@ type Media struct {
 	forward      bool
 	palindrome   bool
 	phase        float64
-	alteredPhase float64
+	dirPld       float64
 	offset       float64
 	shiftedPhase float64
 	antiphase    float64
@@ -81,70 +83,12 @@ func NewMedia(filename string, t *sync.Transport) (m *Media, err error) {
 		palindrome:   false,
 		offset:       0,
 		phase:        0,
-		alteredPhase: 0,
 		shiftedPhase: 0,
 	}
 	media.Grooverize(t)
 	return media, nil
 }
 
-func (m *Media) PalindromemordnilaP(t *sync.Transport) {
-	m.offset = m.phase
-	m.timepoint = m.shiftedPhase
-	switch {
-	case !m.palindrome:
-		m.Multiple = m.Multiple * 2.0
-		m.palindrome = true
-		m.Grooverize(t)
-	case m.palindrome:
-		m.Multiple = m.Multiple * 0.5
-		m.palindrome = false
-		m.Grooverize(t)
-	}
-}
-
-// this function calculates positive remainder from division to 1
-func Wrap(m, n float64) float64 {
-	return math.Mod(math.Mod(m, n)+n, n)
-}
-
-func (m *Media) calcFrame() (frame float64) {
-	m.antiphase = -m.phase
-	switch {
-	case m.palindrome:
-		m.shiftedPhase = 1 - math.Abs(Wrap((m.phase-m.offset+m.timepoint)*2.0, 2)-1.0)
-		break
-	case m.forward:
-		m.shiftedPhase = Wrap(m.phase-m.offset+m.timepoint, 1)
-		frame = m.Framecount * m.shiftedPhase
-		break
-	case !m.forward:
-		m.antiphase += m.offset
-		m.shiftedPhase = Wrap(m.timepoint+m.antiphase, 1)
-		frame = m.Framecount * m.shiftedPhase
-		break
-	}
-	frame = m.Framecount * m.shiftedPhase
-	fmt.Printf("\rCurrent frame %06d, phase %.2f, offset %.2f, shiftedPhase %.2f, alteredPhase %.2f",
-		int(frame), m.phase, m.offset, m.shiftedPhase, m.alteredPhase)
-	return
-}
-
-func (m *Media) Swap() {
-	m.forward = !m.forward
-	m.timepoint = m.shiftedPhase
-	m.offset = m.phase
-}
-
-func (m *Media) Zero() {
-	m.offset = m.phase
-	m.timepoint = 0
-}
-
-func (m *Media) Jump() {
-	rand.Seed(time.Now().UnixNano())
-	m.offset = rand.Float64()
-}
 func (m *Media) Frame(phase float64) gocv.Mat {
 	m.phase = phase
 	// find number of frame
@@ -168,43 +112,6 @@ func Resize(frame *gocv.Mat, size image.Point) *gocv.Mat {
 	return frame
 }
 
-func (m *Media) BarsTotal(duration float64, Measure uint8) (f float64) {
-	beatsTotal := int(Round((m.Duration / duration), float64(Measure)))
-	log.Println("beats total is", beatsTotal)
-	bars := beatsTotal / int(Measure)
-	defer log.Println("bars total", bars)
-	if bars < 1.0 {
-		return 1.0
-	}
-	return float64(bars)
-}
-
-func Round(x, unit float64) float64 {
-	return math.Round(x/unit) * unit
-}
-
-func (m *Media) Squarize(b float64) (length float64) {
-	// finding a "square" pattern - bars count to fit media duration in musical time
-	sqLog := math.Log2(b)
-	// and return the needed power to make it square
-	return math.Pow(2, math.Round(sqLog))
-
-}
-
-func (m *Media) Grooverize(t *sync.Transport) {
-	b := m.BarsTotal(t.OneBeatDurationInMs(), t.TimeSignature.Measure)
-	if b > 4.0 {
-		m.LoopLen = b
-	} else {
-		m.LoopLen = m.Squarize(b)
-	}
-	m.LoopLen = m.LoopLen * float64(t.TimeSignature.Measure) * m.Multiple
-	log.Println("pattern", m.LoopLen)
-}
-
-func (m *Media) UpdateRate() {
-
-}
 func (m *Media) Close() {
 	m.V.Close()
 	m.F.Close()
