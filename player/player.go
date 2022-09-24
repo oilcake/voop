@@ -30,10 +30,7 @@ play:
 		default:
 			// pass
 		}
-		// calculate a playing phase
-		// ph := p.LoopPhase(p.Transport)
-		// fmt.Printf("\rCurrent beat is %.9f and phase is %.9f", (<-p.Transport.Status).Beat, ph)
-		// to retrieve specific frame
+		// retrieve frame
 		img := p.Media.Frame()
 		// and display it
 		p.Window.IMShow(img)

@@ -18,6 +18,7 @@ const (
 
 var (
 	shift, dir float64
+	scaledSize image.Point
 )
 
 type ImgShape struct {
@@ -94,7 +95,6 @@ func NewMedia(filename string, t *sync.Transport) (m *Media, err error) {
 }
 
 func (m *Media) Frame() gocv.Mat {
-	m.phase = m.LoopPhase()
 	// find number of frame
 	f := m.calcFrame()
 	// rewind
@@ -105,7 +105,7 @@ func (m *Media) Frame() gocv.Mat {
 		log.Fatal("Unable to read VideoCaptureFile")
 	}
 	// resize
-	scaledSize := image.Point{clipWidth, int(math.Round(clipWidth / m.Shape.AspRt))}
+	scaledSize = image.Point{clipWidth, int(math.Round(clipWidth / m.Shape.AspRt))}
 	m.F = Resize(m.F, scaledSize)
 	return *m.F
 }

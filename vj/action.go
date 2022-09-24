@@ -32,15 +32,15 @@ func (vj *VJ) Action(ascii int) {
 		vj.SwitchMedia(vj.Lib.FldPrev())
 	// RATE
 	case "0":
-		vj.Player.Media.UpdateRate(1)
+		vj.Player.Media.DefaultRate()
 	case "-":
-		vj.Player.Media.UpdateRate(2)
+		vj.Player.Media.MultRate(2)
 	case "=":
-		vj.Player.Media.UpdateRate(0.5)
+		vj.Player.Media.MultRate(0.5)
 	case "_":
-		vj.Player.Media.UpdateRate(1.5)
+		vj.Player.Media.MultRate(1.5)
 	case "+":
-		vj.Player.Media.UpdateRate(0.75)
+		vj.Player.Media.MultRate(0.75)
 	// Sync default to link clock
 	case "r":
 		vj.Player.Media.ReSync()

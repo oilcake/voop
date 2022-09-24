@@ -43,6 +43,7 @@ func (m *Media) Wrap(x, y float64) float64 {
 }
 
 func (m *Media) calcFrame() (frame float64) {
+	m.phase = m.LoopPhase()
 	m.antiphase = -m.phase
 	switch m.forward {
 	case true:
@@ -64,6 +65,8 @@ func (m *Media) calcFrame() (frame float64) {
 	frame = m.Framecount * m.shiftedPhase
 	fmt.Printf("\rCurrent frame %06d, phase %.2f, offset %.2f, shiftedPhase %.2f, dirPld %.2f",
 		int(frame), m.phase, m.offset, m.shiftedPhase, m.dirPld)
+	// looks like I really have to do it twice, otherwise we have jumping frame
+	m.phase = m.LoopPhase()
 	return
 }
 
@@ -87,7 +90,16 @@ func (m *Media) Jump() {
 	m.offset = rand.Float64()
 }
 
-func (m *Media) UpdateRate(rate float64) {
+func (m *Media) DefaultRate() {
+	m.Multiple = 1
+	m.MultRate(1)
+}
+
+func (m *Media) MultRate(rate float64) {
+	t := m.shiftedPhase
 	m.Multiple *= rate
 	m.Grooverize()
+	m.phase = m.LoopPhase()
+	m.offset = m.phase
+	m.timepoint = t
 }
