@@ -23,9 +23,9 @@ func (r *read) now() int {
 func (r *read) random() {
 	rand.Seed(time.Now().UnixNano())
 	tmp = r.rightNow
-	r.rightNow = rand.Intn(r.size - 1)
+	r.rightNow = rand.Intn(r.size)
 	if tmp == r.rightNow {
-		r.random()
+		r.next()
 	}
 }
 
