@@ -6,21 +6,21 @@ import (
 	"math"
 	"math/rand"
 	"time"
-	"voop/sync"
 )
 
-func (m *Media) LoopPhase(t *sync.Transport) float64 {
-	st := <-t.Status
+func (m *Media) LoopPhase() float64 {
+	st := <-m.transport.Status
 
 	if st.D {
+		log.SetFlags(log.Lshortfile)
 		log.Println("Tempo is now", st.Bpm)
-		m.Grooverize(t)
+		m.Grooverize()
 	}
 	phase := math.Mod(st.Beat, m.LoopLen) / m.LoopLen
 	return phase
 }
 
-func (m *Media) PalindromemordnilaP(t *sync.Transport) {
+func (m *Media) PalindromemordnilaP() {
 	m.palindrome = !m.palindrome
 	switch m.forward {
 	case true:
@@ -34,7 +34,7 @@ func (m *Media) PalindromemordnilaP(t *sync.Transport) {
 	case false:
 		m.Multiple = m.Multiple * 0.5
 	}
-	m.Grooverize(t)
+	m.Grooverize()
 }
 
 // this function calculates positive remainder from division to 1
@@ -87,7 +87,7 @@ func (m *Media) Jump() {
 	m.offset = rand.Float64()
 }
 
-func (m *Media) UpdateRate(rate float64, t *sync.Transport) {
+func (m *Media) UpdateRate(rate float64) {
 	m.Multiple *= rate
-	m.Grooverize(t)
+	m.Grooverize()
 }

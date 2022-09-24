@@ -39,6 +39,7 @@ func NewTransport() (*Transport, error) {
 
 func (t *Transport) OneBeatDurationInMs() (duration float64) {
 	duration = 60.0 / float64((<-t.Status).Bpm)
+	log.SetFlags(log.Lshortfile)
 	log.Printf("one beat is %v seconds\n", duration)
 	return
 }

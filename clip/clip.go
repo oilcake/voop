@@ -35,6 +35,7 @@ type Media struct {
 	LoopLen      float64   // Media pattern's length
 	Shape        *ImgShape
 	Multiple     float64
+	transport    *sync.Transport
 	forward      bool
 	palindrome   bool
 	phase        float64
@@ -47,6 +48,7 @@ type Media struct {
 
 func NewMedia(filename string, t *sync.Transport) (m *Media, err error) {
 	fmt.Println()
+	log.SetFlags(log.Lshortfile)
 	log.Println("opening ", filename)
 	// open file
 	clip, err := gocv.VideoCaptureFile(filename)
@@ -71,26 +73,28 @@ func NewMedia(filename string, t *sync.Transport) (m *Media, err error) {
 
 	f := gocv.NewMat()
 	media := &Media{
-		Name:         filename,
-		V:            clip,
-		Duration:     msDur,
-		Framecount:   framecount,
-		F:            &f,
-		LoopLen:      0.0,
-		Shape:        shape,
-		Multiple:     1.0,
+		Name:       filename,
+		V:          clip,
+		Duration:   msDur,
+		Framecount: framecount,
+		F:          &f,
+		LoopLen:    0.0,
+		Shape:      shape,
+		Multiple:   1.0,
+		transport:  t,
+		// creepy loop stuff
 		forward:      true,
 		palindrome:   false,
 		offset:       0,
 		phase:        0,
 		shiftedPhase: 0,
 	}
-	media.Grooverize(t)
+	media.Grooverize()
 	return media, nil
 }
 
-func (m *Media) Frame(phase float64) gocv.Mat {
-	m.phase = phase
+func (m *Media) Frame() gocv.Mat {
+	m.phase = m.LoopPhase()
 	// find number of frame
 	f := m.calcFrame()
 	// rewind

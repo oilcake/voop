@@ -11,36 +11,36 @@ func (vj *VJ) Action(ascii int) {
 	switch key {
 	// Random file from library
 	case "`":
-		vj.Player.SwitchMedia(vj.Lib.FileSuperRnd())
+		vj.SwitchMedia(vj.Lib.FileSuperRnd())
 	// Random file from folder
 	case "/":
-		vj.Player.SwitchMedia(vj.Lib.FileRandom())
+		vj.SwitchMedia(vj.Lib.FileRandom())
 	// next
 	case ".":
-		vj.Player.SwitchMedia(vj.Lib.FileNext())
+		vj.SwitchMedia(vj.Lib.FileNext())
 	// previous
 	case ",":
-		vj.Player.SwitchMedia(vj.Lib.FilePrev())
+		vj.SwitchMedia(vj.Lib.FilePrev())
 	// random folder
 	case "§":
-		vj.Player.SwitchMedia(vj.Lib.FldRnd())
+		vj.SwitchMedia(vj.Lib.FldRnd())
 	// next
 	case "]":
-		vj.Player.SwitchMedia(vj.Lib.FldNext())
+		vj.SwitchMedia(vj.Lib.FldNext())
 	// previous
 	case "[":
-		vj.Player.SwitchMedia(vj.Lib.FldPrev())
+		vj.SwitchMedia(vj.Lib.FldPrev())
 	// RATE
 	case "0":
-		vj.Player.Media.UpdateRate(1, vj.Player.Transport)
+		vj.Player.Media.UpdateRate(1)
 	case "-":
-		vj.Player.Media.UpdateRate(2, vj.Player.Transport)
+		vj.Player.Media.UpdateRate(2)
 	case "=":
-		vj.Player.Media.UpdateRate(0.5, vj.Player.Transport)
+		vj.Player.Media.UpdateRate(0.5)
 	case "_":
-		vj.Player.Media.UpdateRate(1.5, vj.Player.Transport)
+		vj.Player.Media.UpdateRate(1.5)
 	case "+":
-		vj.Player.Media.UpdateRate(0.75, vj.Player.Transport)
+		vj.Player.Media.UpdateRate(0.75)
 	// Sync default to link clock
 	case "r":
 		vj.Player.Media.ReSync()
@@ -55,7 +55,7 @@ func (vj *VJ) Action(ascii int) {
 		vj.Player.Media.Jump()
 	// palindrome
 	case "p":
-		vj.Player.Media.PalindromemordnilaP(vj.Player.Transport)
+		vj.Player.Media.PalindromemordnilaP()
 	// Fullscreen
 	case "f":
 		vj.Player.Window.Fullscreen()

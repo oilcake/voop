@@ -1,43 +1,40 @@
 package player
 
 import (
-	"log"
 	"voop/clip"
 	"voop/sync"
 )
 
-var (
-	err             error
-	oldMedia, media *clip.Media
-	mNext           chan *clip.Media
-)
-
 type Player struct {
 	*sync.Clock
-	*sync.Transport
 	*Window
-	*clip.Media
+	Media  *clip.Media
 	HotKey chan int
 }
 
-func (p *Player) PlayMedia() {
+func (p *Player) PlayMedia(media chan *clip.Media) {
 	p.HotKey = make(chan int)
-	mNext = make(chan *clip.Media)
-	var k int
+	var (
+		k          int
+		m, garbage *clip.Media
+	)
 	// play it in cycle forever
 play:
 	for range p.Clock.Trigger {
 		select {
-		case m := <-mNext:
+		case m = <-media:
+			// ok, we've got a media
+			garbage = p.Media
 			p.Media = m
+			garbage.Close()
 		default:
 			// pass
 		}
 		// calculate a playing phase
-		ph := p.LoopPhase(p.Transport)
+		// ph := p.LoopPhase(p.Transport)
 		// fmt.Printf("\rCurrent beat is %.9f and phase is %.9f", (<-p.Transport.Status).Beat, ph)
 		// to retrieve specific frame
-		img := p.Media.Frame(ph)
+		img := p.Media.Frame()
 		// and display it
 		p.Window.IMShow(img)
 		k = p.Window.WaitKey(19)
@@ -48,17 +45,4 @@ play:
 			p.HotKey <- k
 		}
 	}
-}
-
-func (p *Player) SwitchMedia(path string) {
-	go func() {
-		media, err = clip.NewMedia(path, p.Transport)
-		if err != nil {
-			log.Fatal("error while opening media", err)
-		}
-		oldMedia = p.Media
-		mNext <- media
-		oldMedia.Close()
-	}()
-
 }

@@ -20,6 +20,7 @@ type Reader interface {
 func ChooseRandomFile(path string) (string, error) {
 
 	files := library.SupportedFilesFrom(path)
+	log.SetFlags(log.Lshortfile)
 	log.Println("files total", len(files))
 	rand.Seed(time.Now().UnixNano())
 	file := files[rand.Intn(len(files)-1)]

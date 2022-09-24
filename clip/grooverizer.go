@@ -3,11 +3,11 @@ package clip
 import (
 	"log"
 	"math"
-	"voop/sync"
 )
 
 func (m *Media) BarsTotal(duration float64, Measure uint8) (f float64) {
 	beatsTotal := int(Round((m.Duration / duration), float64(Measure)))
+	log.SetFlags(log.Lshortfile)
 	log.Println("beats total is", beatsTotal)
 	bars := beatsTotal / int(Measure)
 	defer log.Println("bars total", bars)
@@ -29,13 +29,15 @@ func (m *Media) Squarize(b float64) (length float64) {
 
 }
 
-func (m *Media) Grooverize(t *sync.Transport) {
-	b := m.BarsTotal(t.OneBeatDurationInMs(), t.TimeSignature.Measure)
+func (m *Media) Grooverize() {
+	log.SetFlags(log.Lshortfile)
+	log.Println("one beat is ", m.transport.OneBeatDurationInMs())
+	b := m.BarsTotal(m.transport.OneBeatDurationInMs(), m.transport.TimeSignature.Measure)
 	if b > 4.0 {
 		m.LoopLen = b
 	} else {
 		m.LoopLen = m.Squarize(b)
 	}
-	m.LoopLen = m.LoopLen * float64(t.TimeSignature.Measure) * m.Multiple
+	m.LoopLen = m.LoopLen * float64(m.transport.TimeSignature.Measure) * m.Multiple
 	log.Println("pattern", m.LoopLen)
 }
