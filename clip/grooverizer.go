@@ -29,15 +29,20 @@ func (m *Media) Squarize(b float64) (length float64) {
 
 }
 
-func (m *Media) Grooverize() {
+func (m *Media) findLoopLength() (loopLen float64) {
 	log.SetFlags(log.Lshortfile)
 	log.Println("one beat is ", m.transport.OneBeatDurationInMs())
 	b := m.BarsTotal(m.transport.OneBeatDurationInMs(), m.transport.TimeSignature.Measure)
 	if b > 4.0 {
-		m.LoopLen = b
+		loopLen = b
 	} else {
-		m.LoopLen = m.Squarize(b)
+		loopLen = m.Squarize(b)
 	}
-	m.LoopLen = m.LoopLen * float64(m.transport.TimeSignature.Measure) * m.Multiple
-	log.Println("pattern", m.LoopLen)
+	loopLen = loopLen * float64(m.transport.TimeSignature.Measure) * m.multiple
+	log.Println("pattern", loopLen)
+	return
+}
+
+func (m *Media) Grooverize() {
+	m.LoopLen = m.findLoopLength()
 }

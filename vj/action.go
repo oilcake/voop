@@ -34,16 +34,19 @@ func (vj *VJ) Action(ascii int) {
 	case "0":
 		vj.Player.Media.DefaultRate()
 	case "-":
-		vj.Player.Media.MultRate(2)
+		vj.Player.Media.RateX <- 2
 	case "=":
-		vj.Player.Media.MultRate(0.5)
+		vj.Player.Media.RateX <- 0.5
 	case "_":
-		vj.Player.Media.MultRate(1.5)
+		vj.Player.Media.RateX <- 1.5
 	case "+":
-		vj.Player.Media.MultRate(0.75)
+		vj.Player.Media.RateX <- 0.75
 	// Sync default to link clock
 	case "r":
 		vj.Player.Media.ReSync()
+	// HardSync Mode
+	case "H":
+		vj.Player.Media.HardSyncToggle()
 	// Zero (play from frame 0)
 	case "z":
 		vj.Player.Media.Zero()

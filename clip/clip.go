@@ -17,8 +17,8 @@ const (
 )
 
 var (
-	shift, dir float64
-	scaledSize image.Point
+	f, shift, dir float64
+	scaledSize    image.Point
 )
 
 type ImgShape struct {
@@ -28,23 +28,27 @@ type ImgShape struct {
 }
 
 type Media struct {
-	Name         string
-	V            *gocv.VideoCapture
-	Duration     float64
-	Framecount   float64
-	F            *gocv.Mat //this is a current frame object
-	LoopLen      float64   // Media pattern's length
-	Shape        *ImgShape
-	Multiple     float64
+	Name       string
+	V          *gocv.VideoCapture
+	Duration   float64
+	Framecount float64
+	F          *gocv.Mat //this is a current frame object
+	LoopLen    float64   // Media pattern's length
+	Shape      *ImgShape
+	multiple   float64
+	RateX      chan float64
+	// creepy loop stuff
 	transport    *sync.Transport
 	forward      bool
 	palindrome   bool
+	plndrmTrigga chan struct{}
 	phase        float64
 	dirPld       float64
 	offset       float64
 	shiftedPhase float64
 	antiphase    float64
 	timepoint    float64
+	hardSync     bool
 }
 
 func NewMedia(filename string, t *sync.Transport) (m *Media, err error) {
@@ -81,25 +85,26 @@ func NewMedia(filename string, t *sync.Transport) (m *Media, err error) {
 		F:          &f,
 		LoopLen:    0.0,
 		Shape:      shape,
-		Multiple:   1.0,
+		multiple:   1.0,
 		transport:  t,
+		RateX:      make(chan float64),
 		// creepy loop stuff
 		forward:      true,
 		palindrome:   false,
+		plndrmTrigga: make(chan struct{}),
 		offset:       0,
 		phase:        0,
 		shiftedPhase: 0,
+		hardSync:     false,
 	}
 	media.Grooverize()
 	return media, nil
 }
 
 func (m *Media) Frame() gocv.Mat {
-	// find number of frame
-	f := m.calcFrame()
-	// rewind
-	m.V.Set(gocv.VideoCapturePosFrames, f)
-	// read it
+	// find number of frame and rewind
+	m.V.Set(gocv.VideoCapturePosFrames, m.calcFrame())
+	// read frame and place it into frame object
 	m.V.Read(m.F)
 	if m.F.Empty() {
 		log.Fatal("Unable to read VideoCaptureFile")

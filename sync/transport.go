@@ -29,7 +29,7 @@ type TimeSignature struct {
 }
 
 func NewTransport() (*Transport, error) {
-	st := make(chan Status)
+	st := make(chan Status, 3)
 	NewLink(st)
 	return &Transport{
 		Status:        st,
