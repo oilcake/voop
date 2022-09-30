@@ -2,6 +2,7 @@ package clip
 
 import (
 	"errors"
+	"fmt"
 	"image"
 	"log"
 	"math"
@@ -12,7 +13,12 @@ import (
 )
 
 const (
-	clipWidth = 1000.0
+	clipWidth = 1200.0
+)
+
+var (
+	f, shift, dir float64
+	scaledSize    image.Point
 )
 
 type ImgShape struct {
@@ -27,12 +33,28 @@ type Media struct {
 	Duration   float64
 	Framecount float64
 	F          *gocv.Mat //this is a current frame object
-	P          float64   // Media pattern's length
+	LoopLen    float64   // Media pattern's length
 	Shape      *ImgShape
-	Multiple   float64
+	multiple   float64
+	RateX      chan float64
+	// creepy loop stuff
+	transport    *sync.Transport
+	forward      bool
+	palindrome   bool
+	plndrmTrigga chan struct{}
+	phase        float64
+	dirPld       float64
+	offset       float64
+	shiftedPhase float64
+	antiphase    float64
+	timepoint    float64
+	hardSync     bool
 }
 
 func NewMedia(filename string, t *sync.Transport) (m *Media, err error) {
+	fmt.Println()
+	log.SetFlags(log.Lshortfile)
+	log.Println("opening ", filename)
 	// open file
 	clip, err := gocv.VideoCaptureFile(filename)
 	if !clip.IsOpened() {
@@ -61,70 +83,42 @@ func NewMedia(filename string, t *sync.Transport) (m *Media, err error) {
 		Duration:   msDur,
 		Framecount: framecount,
 		F:          &f,
-		P:          0.0,
+		LoopLen:    0.0,
 		Shape:      shape,
-		Multiple:   1.0,
+		multiple:   1.0,
+		transport:  t,
+		RateX:      make(chan float64),
+		// creepy loop stuff
+		forward:      true,
+		palindrome:   false,
+		plndrmTrigga: make(chan struct{}),
+		offset:       0,
+		phase:        0,
+		shiftedPhase: 0,
+		hardSync:     false,
 	}
-	media.Pattern(t)
+	media.Grooverize()
 	return media, nil
 }
 
-func (m *Media) Frame(phase float64) gocv.Mat {
-	// find frame
-	f := phase * m.Framecount
-	// rewind
-	m.V.Set(gocv.VideoCapturePosFrames, f)
-	// read video frame
+func (m *Media) Frame() gocv.Mat {
+	// find number of frame and rewind
+	m.V.Set(gocv.VideoCapturePosFrames, m.calcFrame())
+	// read frame and place it into frame object
 	m.V.Read(m.F)
 	if m.F.Empty() {
 		log.Fatal("Unable to read VideoCaptureFile")
 	}
-	// resize frame
-	scaledSize := image.Point{clipWidth, int(math.Round(clipWidth / m.Shape.AspRt))}
-	gocv.Resize(*m.F, m.F, scaledSize, 0.0, 0.0, gocv.InterpolationDefault)
+	// resize
+	scaledSize = image.Point{clipWidth, int(math.Round(clipWidth / m.Shape.AspRt))}
+	m.F = Resize(m.F, scaledSize)
 	return *m.F
 }
 
-func (m *Media) BarsTotal(BeatDuration float64, Measure uint8) (f float64) {
-	beatsTotal := int(math.Round(m.Duration / BeatDuration))
-	log.Println("beats total is", beatsTotal)
-	bars := beatsTotal / int(Measure)
-	defer log.Println("bars total", bars)
-	if bars < 1.0 {
-		return 1.0
-	}
-	return float64(bars)
-}
+func Resize(frame *gocv.Mat, size image.Point) *gocv.Mat {
 
-func (m *Media) Squarize(t *sync.Transport, b float64) (length float64) {
-	// finding a "square" pattern - bars count to fit media duration in musical time
-	sqLog := math.Log2(b)
-	// and return the needed power to make it square
-	return math.Pow(2, math.Round(sqLog))
-
-}
-
-func (m *Media) Pattern(t *sync.Transport) {
-	b := m.BarsTotal(t.BeatDur(), t.TimeSignature.Measure)
-	if b > 4.0 {
-		m.P = b
-	} else {
-		m.P = m.Squarize(t, b)
-	}
-	m.P = m.P * float64(t.TimeSignature.Measure) * m.Multiple
-	log.Println("pattern", m.P)
-
-}
-
-func (m *Media) Position(t *sync.Transport) float64 {
-	st := <-t.Status
-
-	if st.D {
-		log.Println("Tempo is now", (<-t.Status).Bpm)
-		m.Pattern(t)
-	}
-	phase := math.Mod(st.Beat, m.P) / m.P
-	return phase
+	gocv.Resize(*frame, frame, size, 0.0, 0.0, gocv.InterpolationDefault)
+	return frame
 }
 
 func (m *Media) Close() {

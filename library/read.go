@@ -2,32 +2,43 @@ package library
 
 import (
 	"math/rand"
+	"time"
 )
 
 var (
 	SupportedTypes = [...]string{".mp4", ".mpg", ".mov", ".avi", ".wmv", ".mkv"}
+	tmp            int
 )
 
-type Read struct {
-	RightNow int
-	Size     int
+type read struct {
+	rightNow int
+	size     int
 }
 
 // Navigation
-func (r *Read) Now() int {
-	return r.RightNow
+func (r *read) now() int {
+	return r.rightNow
 }
 
-func (r *Read) Random() {
-	r.RightNow = rand.Intn(r.Size - 1)
+func (r *read) random() {
+	rand.Seed(time.Now().UnixNano())
+	tmp = r.rightNow
+	r.rightNow = rand.Intn(r.size)
+	if tmp == r.rightNow {
+		r.next()
+	}
 }
 
-func (r *Read) Next() {
-	r.RightNow = (r.RightNow + 1) % r.Size
+func (r *read) next() {
+	r.rightNow = (r.rightNow + 1) % r.size
 }
 
-func (r *Read) Previous() {
-	m := r.Size - r.RightNow
-	m = m % r.Size
-	r.RightNow = r.Size - m - 1
+func (r *read) previous() {
+	m := r.size - r.rightNow
+	m = m % r.size
+	r.rightNow = r.size - m - 1
+}
+
+func (r *read) Default() {
+	r.rightNow = 0
 }

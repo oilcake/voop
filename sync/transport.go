@@ -29,7 +29,7 @@ type TimeSignature struct {
 }
 
 func NewTransport() (*Transport, error) {
-	st := make(chan Status)
+	st := make(chan Status, 3)
 	NewLink(st)
 	return &Transport{
 		Status:        st,
@@ -37,8 +37,9 @@ func NewTransport() (*Transport, error) {
 	}, nil
 }
 
-func (t *Transport) BeatDur() (duration float64) {
-	oneBeatDuration := 60.0 / float64((<-t.Status).Bpm)
-	log.Printf("one beat is %v seconds\n", oneBeatDuration)
-	return oneBeatDuration
+func (t *Transport) OneBeatDurationInMs() (duration float64) {
+	duration = 60.0 / float64((<-t.Status).Bpm)
+	log.SetFlags(log.Lshortfile)
+	log.Printf("one beat is %v seconds\n", duration)
+	return
 }

@@ -6,12 +6,17 @@ import (
 	"log"
 	_ "net/http/pprof"
 	"time"
-	"voop/library"
+	"voop/clip"
+	"voop/config"
 	"voop/player"
 	"voop/sync"
+	"voop/vj"
 )
 
 func main() {
+	// read config and get an actions map
+	k := config.ReadConfig()
+	fmt.Println(k)
 	// initialize clock
 	clock := sync.NewClock(40 * time.Millisecond)
 	defer close(clock.Trigger)
@@ -27,22 +32,26 @@ func main() {
 	defer window.Close()
 
 	// make a player instance
-	p := player.Player{Clock: clock, Transport: t, Window: window}
+	p := player.Player{Clock: clock, Window: window}
 
 	// read video folder
 	var folder = flag.String("folder", "./", "path to your videos")
 	flag.Parse()
 	fmt.Println(*folder)
 
+	// call VJ
+	m := make(chan *clip.Media)
+	vj := vj.VJ{Player: p, Config: *k, Transport: t, Media: m}
 	// preload a bunch of files
-	lib, err := library.NewLibrary(folder, t)
-	if err != nil {
-		log.Fatal("cannot preload library", err)
-	}
+	vj.OpenLibrary(folder)
+	// listen for key presses
+	go vj.WaitForAction()
 
 	// and play it forever
-	player.PlayLibrary(&p, lib)
+	vj.Player.PlayMedia(vj.Media)
 
 	// Bye
+	log.SetFlags(log.Lshortfile)
+	log.Println()
 	log.Println("ciao")
 }
