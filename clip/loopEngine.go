@@ -5,17 +5,14 @@ import (
 	"log"
 	"math"
 	"math/rand"
-	"sync"
 	"time"
 )
 
 var (
-	r  float64
-	mu sync.Mutex
+	r float64
 )
 
 func (m *Media) calcFrame() (frame float64) {
-	mu.Lock()
 	select {
 	case r = <-m.RateX:
 		m.multRate(r)
@@ -44,7 +41,6 @@ func (m *Media) calcFrame() (frame float64) {
 	frame = m.Framecount * m.shiftedPhase
 	fmt.Printf("\rCurrent frame %06d, phase %.2f, offset %.2f, shiftedPhase %.2f, dirPld %.2f",
 		int(frame), m.phase, m.offset, m.shiftedPhase, m.dirPld)
-	mu.Unlock()
 	return
 }
 
