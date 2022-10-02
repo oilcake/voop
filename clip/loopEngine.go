@@ -19,6 +19,7 @@ func (m *Media) calcFrame() (frame float64) {
 	select {
 	case r = <-m.RateX:
 		m.multRate(r)
+		m.phase = m.LoopPhase()
 	default:
 		m.phase = m.LoopPhase()
 	}
@@ -29,14 +30,14 @@ func (m *Media) calcFrame() (frame float64) {
 		break
 	case false:
 		m.shiftedPhase = m.antiphase + m.offset
-		break
 	}
 	// check palindromicity
 	switch m.palindrome {
 	case true:
-		shift = (m.offset - m.timepoint) * 0.5
+		// shift = (m.offset - m.timepoint) * 0.5
 		m.shiftedPhase = Wrap(m.shiftedPhase+m.timepoint, 1)
 		m.shiftedPhase = math.Abs(m.dirPld - math.Abs(m.shiftedPhase*2.0-1))
+		break
 	case false:
 		m.shiftedPhase = Wrap(m.shiftedPhase+m.timepoint, 1)
 	}
@@ -72,6 +73,7 @@ func (m *Media) PalindromemordnilaP() {
 	case false:
 		m.RateX <- 0.5
 	}
+	// m.pldOffset = m.shiftedPhase - m.GetLoopPhase(m.LoopLen*2)
 }
 
 func (m *Media) Swap() {
@@ -91,6 +93,7 @@ func (m *Media) ReSync() {
 	m.offset = 0
 	m.timepoint = 0
 }
+
 func (m *Media) Jump() {
 	rand.Seed(time.Now().UnixNano())
 	m.offset = rand.Float64()

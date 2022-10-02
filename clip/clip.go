@@ -49,6 +49,7 @@ type Media struct {
 	antiphase    float64
 	timepoint    float64
 	hardSync     bool
+	pldOffset    float64
 }
 
 func NewMedia(filename string, t *sync.Transport) (m *Media, err error) {
@@ -95,7 +96,7 @@ func NewMedia(filename string, t *sync.Transport) (m *Media, err error) {
 		offset:       0,
 		phase:        0,
 		shiftedPhase: 0,
-		hardSync:     false,
+		hardSync:     true,
 	}
 	media.Grooverize()
 	return media, nil
