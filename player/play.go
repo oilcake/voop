@@ -17,9 +17,9 @@ type Reader interface {
 	What(index int) interface{}
 }
 
-func ChooseRandomFile(path string) (string, error) {
+func ChooseRandomFile(path string, supported []string) (string, error) {
 
-	files := library.SupportedFilesFrom(path)
+	files := library.SupportedFilesFrom(path, supported)
 	log.SetFlags(log.Lshortfile)
 	log.Println("files total", len(files))
 	rand.Seed(time.Now().UnixNano())

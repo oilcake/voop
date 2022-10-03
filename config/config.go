@@ -33,18 +33,17 @@ type Config struct {
 	Shortcuts
 }
 
-func ReadConfig(filename string) (keyboard *Keyboard) {
-	k := make(Keyboard)
-	keyboard = &k
-
+func ReadConfig(filename string) (config Config) {
 	yamlFile, err := ioutil.ReadFile(filename)
 	check(err)
-
-	var config Config
-
 	err = yaml.Unmarshal(yamlFile, &config)
 	check(err)
+	return
+}
 
+func CollectShortCuts(config Config) (keyboard *Keyboard) {
+	k := make(Keyboard)
+	keyboard = &k
 	gatherActions(&config.Shortcuts, keyboard)
 	return keyboard
 }

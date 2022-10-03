@@ -6,8 +6,7 @@ import (
 )
 
 var (
-	SupportedTypes = [...]string{".mp4", ".mpg", ".mov", ".avi", ".wmv", ".mkv"}
-	tmp            int
+	tmp int
 )
 
 type read struct {

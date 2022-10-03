@@ -20,12 +20,13 @@ type VJ struct {
 	Player    player.Player
 	Lib       *library.Library
 	Media     chan *clip.Media
-	Config    config.Keyboard
+	Shortcuts config.Keyboard
+	Config    config.Config
 }
 
 func (vj *VJ) OpenLibrary(folder *string) {
 
-	lib, err := library.NewLibrary(folder)
+	lib, err := library.NewLibrary(folder, vj.Config.Supported)
 	if err != nil {
 		log.Fatal("cannot preload library", err)
 	}
@@ -39,7 +40,7 @@ func (vj *VJ) OpenLibrary(folder *string) {
 
 func (vj *VJ) WaitForAction() {
 	for key := range vj.Player.HotKey {
-		action := vj.Config[key]
+		action := vj.Shortcuts[key]
 		vj.Action(action)
 	}
 }

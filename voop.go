@@ -20,8 +20,14 @@ func main() {
 	flag.Parse()
 	fmt.Println(*folder, *confFile)
 
-	// read config and get an actions map
-	k := config.ReadConfig(*confFile)
+	// read config
+	conf := config.ReadConfig(*confFile)
+	fmt.Println(conf)
+	fmt.Println()
+	fmt.Println(conf.Supported)
+
+	// and get an actions map from it
+	k := config.CollectShortCuts(conf)
 	fmt.Println(k)
 	// initialize clock
 	clock := sync.NewClock(40 * time.Millisecond)
@@ -42,7 +48,7 @@ func main() {
 
 	// call VJ
 	m := make(chan *clip.Media)
-	vj := vj.VJ{Player: p, Config: *k, Transport: t, Media: m}
+	vj := vj.VJ{Player: p, Config: conf, Shortcuts: *k, Transport: t, Media: m}
 	// preload a bunch of files
 	vj.OpenLibrary(folder)
 	// listen for key presses

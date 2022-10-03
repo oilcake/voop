@@ -46,29 +46,29 @@ func (s *Set) Close() {
 */
 
 // Handy functions
-func SupportedFilesFrom(path string) (sf []string) {
+func SupportedFilesFrom(path string, supported []string) (sf []string) {
 	sf = make([]string, 0)
-	if err := AddFiles(&sf, path); err != nil {
+	if err := AddFiles(&sf, path, supported); err != nil {
 		log.Fatal("can't open folder", err)
 	}
 	log.Println("files total", len(sf))
 	return
 }
 
-func AddFiles(sf *[]string, path string) error {
+func AddFiles(sf *[]string, path string, supported []string) error {
 	files, err := ioutil.ReadDir(path)
 	if err != nil {
 		return err
 	}
 
 	for _, file := range files {
-		if Supported(file.Name()) {
+		if Supported(file.Name(), supported) {
 			f := path + "/" + file.Name()
 			*sf = append(*sf, f)
 		}
 		if file.IsDir() {
 			fp := path + "/" + file.Name()
-			err = AddFiles(sf, fp)
+			err = AddFiles(sf, fp, supported)
 			if err != nil {
 				return err
 			}
@@ -77,9 +77,9 @@ func AddFiles(sf *[]string, path string) error {
 	return nil
 }
 
-func Supported(file string) bool {
+func Supported(file string, supported []string) bool {
 	ext := filepath.Ext(file)
-	for _, t := range SupportedTypes {
+	for _, t := range supported {
 		if ext == t {
 			return true
 		}

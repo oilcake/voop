@@ -1,13 +1,12 @@
 types:
-  -supported:
-    -".mp4"
-    -".mpg"
-    -".mov"
-    -".avi"
-    -".wmv"
-    -".mkv
-    -".txt"
-  -unsupported:
+  supported:
+    - ".mp4"
+    - ".mpg"
+    - ".mov"
+    - ".avi"
+    - ".wmv"
+    - ".mkv"
+  unsupported:
 
 # watch out - syntax is slightly different than above
 shortcuts:

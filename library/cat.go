@@ -10,9 +10,9 @@ func (f *cat) What(i int) string {
 	return f.files[i]
 }
 
-func NewCat(path string) *cat {
+func NewCat(path string, supported []string) *cat {
 
-	files := SupportedFilesFrom(path)
+	files := SupportedFilesFrom(path, supported)
 
 	return &cat{
 		path,

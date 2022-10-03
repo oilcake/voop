@@ -15,7 +15,7 @@ func (l *Library) What(i int) *cat {
 	return l.index[i]
 }
 
-func NewLibrary(path *string) (l *Library, err error) {
+func NewLibrary(path *string, supported []string) (l *Library, err error) {
 	d := make([]*cat, 0)
 	dirs, err := ioutil.ReadDir(*path)
 	if err != nil {
@@ -25,7 +25,7 @@ func NewLibrary(path *string) (l *Library, err error) {
 	for _, dir := range dirs {
 		if dir.IsDir() {
 			f := *path + "/" + dir.Name()
-			cat := NewCat(f)
+			cat := NewCat(f, supported)
 			cat.Default()
 			d = append(d, cat)
 		}
