@@ -39,7 +39,8 @@ func (vj *VJ) OpenLibrary(folder *string) {
 
 func (vj *VJ) WaitForAction() {
 	for key := range vj.Player.HotKey {
-		vj.Action(key)
+		action := vj.Config[key]
+		vj.Action(action)
 	}
 }
 

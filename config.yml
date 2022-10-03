@@ -15,11 +15,18 @@ shortcuts:
     next: "." # can also include joystick or osc fields
     previous: ","
     random: "/"
+    super_random: "`" # random from the whole library
     rate_double: "="
     rate_half: "-"
     rate_1.5: "+"
     rate_0.75: "_"
     rate_default: "0"
+    dir_flip: "o" # swap the direction
+    palindrome: "p"
+    jump_random: "j" # jump to random position
+    hard_sync: "H"
+    resync: "r"
+    zero: "z" # jump to zero
   kit:
     next: "]" # can also include joystick or osc fields
     previous: "["

@@ -14,8 +14,14 @@ import (
 )
 
 func main() {
+	// read video folder
+	var folder = flag.String("folder", "./samples", "path to your videos")
+	var confFile = flag.String("config", "./config.yml", "configuration")
+	flag.Parse()
+	fmt.Println(*folder, *confFile)
+
 	// read config and get an actions map
-	k := config.ReadConfig()
+	k := config.ReadConfig(*confFile)
 	fmt.Println(k)
 	// initialize clock
 	clock := sync.NewClock(40 * time.Millisecond)
@@ -33,11 +39,6 @@ func main() {
 
 	// make a player instance
 	p := player.Player{Clock: clock, Window: window}
-
-	// read video folder
-	var folder = flag.String("folder", "./", "path to your videos")
-	flag.Parse()
-	fmt.Println(*folder)
 
 	// call VJ
 	m := make(chan *clip.Media)

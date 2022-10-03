@@ -33,10 +33,9 @@ type Config struct {
 	Shortcuts
 }
 
-func ReadConfig() (keyboard *Keyboard) {
+func ReadConfig(filename string) (keyboard *Keyboard) {
 	k := make(Keyboard)
 	keyboard = &k
-	filename := "/Users/Oilcake/Documents/dev//voop/config.yml"
 
 	yamlFile, err := ioutil.ReadFile(filename)
 	check(err)
