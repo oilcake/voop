@@ -30,3 +30,8 @@ shortcuts:
     next: "]" # can also include joystick or osc fields
     previous: "["
     random: "§"
+
+display:
+  size:
+    width: 800
+    height: 600

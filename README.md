@@ -19,7 +19,13 @@ on mac it usually can be done with brew
 brew install opencv
 ```
 
-Voop has some shortcuts:
+you can run Voop with customized config:
+```
+go run . --config="path/to/your/config"
+```
+if no config is specified Voop will be started with default ./config.yml, which can be customized as well. It is also a good overview of actions that could be done with Voop.
+
+Some of Voop's default shortcuts:
 '>' - next video<br/>
 '<' - previous video<br/>
 '/' - random video<br/>

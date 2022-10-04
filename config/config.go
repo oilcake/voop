@@ -28,9 +28,18 @@ type Shortcuts struct {
 	Kit  ActionSet
 }
 
+type Display struct {
+	Size Size
+}
+
+type Size struct {
+	Width  int
+	Height int
+}
 type Config struct {
 	Types
 	Shortcuts
+	Display
 }
 
 func ReadConfig(filename string) (config Config) {

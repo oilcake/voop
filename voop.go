@@ -3,6 +3,7 @@ package main
 import (
 	"flag"
 	"fmt"
+	"image"
 	"log"
 	_ "net/http/pprof"
 	"time"
@@ -11,6 +12,14 @@ import (
 	"voop/player"
 	"voop/sync"
 	"voop/vj"
+)
+
+const (
+	clipWidth = 300.0
+)
+
+var (
+	scaledSize image.Point
 )
 
 func main() {
@@ -25,6 +34,10 @@ func main() {
 	fmt.Println(conf)
 	fmt.Println()
 	fmt.Println(conf.Supported)
+
+	fmt.Println()
+	fmt.Println(conf.Display)
+	fmt.Println()
 
 	// and get an actions map from it
 	k := config.CollectShortCuts(conf)
@@ -43,8 +56,10 @@ func main() {
 	window := player.NewWindow("Voop")
 	defer window.Close()
 
+	// create video FX engine
+	reszr := player.NewResizer(conf.Size.Width, conf.Size.Height)
 	// make a player instance
-	p := player.Player{Clock: clock, Window: window}
+	p := player.Player{Clock: clock, Window: window, Resizer: *reszr}
 
 	// call VJ
 	m := make(chan *clip.Media)

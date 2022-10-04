@@ -8,6 +8,7 @@ import (
 type Player struct {
 	*sync.Clock
 	*Window
+	Resizer
 	Media  *clip.Media
 	HotKey chan int
 }
@@ -32,8 +33,10 @@ play:
 		}
 		// retrieve frame
 		img := p.Media.Frame()
+		// resize
+		p.Resizer.DumbResize(img, p.Media.Shape.AspRt)
 		// and display it
-		p.Window.IMShow(img)
+		p.Window.DisplayFrame(img)
 		k = p.Window.WaitKey(19)
 		switch {
 		case k == 27:

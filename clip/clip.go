@@ -3,22 +3,15 @@ package clip
 import (
 	"errors"
 	"fmt"
-	"image"
 	"log"
-	"math"
 
 	"voop/sync"
 
 	"gocv.io/x/gocv"
 )
 
-const (
-	clipWidth = 1200.0
-)
-
 var (
 	f, shift, dir float64
-	scaledSize    image.Point
 )
 
 type ImgShape struct {
@@ -96,13 +89,13 @@ func NewMedia(filename string, t *sync.Transport) (m *Media, err error) {
 		offset:       0,
 		phase:        0,
 		shiftedPhase: 0,
-		hardSync:     true,
+		hardSync:     false,
 	}
 	media.Grooverize()
 	return media, nil
 }
 
-func (m *Media) Frame() gocv.Mat {
+func (m *Media) Frame() *gocv.Mat {
 	// find number of frame and rewind
 	m.V.Set(gocv.VideoCapturePosFrames, m.calcFrame())
 	// read frame and place it into frame object
@@ -110,16 +103,7 @@ func (m *Media) Frame() gocv.Mat {
 	if m.F.Empty() {
 		log.Fatal("Unable to read VideoCaptureFile")
 	}
-	// resize
-	scaledSize = image.Point{clipWidth, int(math.Round(clipWidth / m.Shape.AspRt))}
-	m.F = Resize(m.F, scaledSize)
-	return *m.F
-}
-
-func Resize(frame *gocv.Mat, size image.Point) *gocv.Mat {
-
-	gocv.Resize(*frame, frame, size, 0.0, 0.0, gocv.InterpolationDefault)
-	return frame
+	return m.F
 }
 
 func (m *Media) Close() {

@@ -20,10 +20,15 @@ func NewWindow(name string) *Window {
 	}
 	window.SetWindowProperty(gocv.WindowPropertyAutosize, gocv.WindowNormal)
 	window.SetWindowProperty(gocv.WindowPropertyAspectRatio, gocv.WindowKeepRatio)
-	window.ResizeWindow(100, 100)
-	return &Window{window}
+	// window.ResizeWindow(100, 100)
+	return &Window{Window: window}
 }
 
 func (w *Window) Fullscreen() {
 	w.Window.SetWindowProperty(gocv.WindowPropertyFullscreen, gocv.WindowFullscreen)
+}
+
+func (w *Window) DisplayFrame(img *gocv.Mat) {
+
+	w.IMShow(*img)
 }
