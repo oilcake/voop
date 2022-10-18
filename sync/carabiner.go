@@ -35,11 +35,7 @@ func (c *Carabiner) parse(message string) {
 }
 
 // implementation of Linker interface
-func (c *Carabiner) Sync() {
+func (c *Carabiner) ProvideSync() *Status {
 	c.parse(c.grab())
-}
-
-func (c *Carabiner) Provide() Status {
-	c.Sync()
-	return *c.St
+	return c.St
 }

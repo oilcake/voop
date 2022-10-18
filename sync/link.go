@@ -1,8 +1,12 @@
 package sync
 
+type Linker interface {
+	ProvideSync() *Status
+}
+
 func NewLink(st chan Status, crbnr Carabiner) {
 	var (
-		watch    Status
+		watch    *Status
 		oldTempo float32
 		newTempo float32
 	)
@@ -10,13 +14,13 @@ func NewLink(st chan Status, crbnr Carabiner) {
 	go func() {
 		for {
 			oldTempo = watch.Bpm
-			watch = crbnr.Provide()
+			watch = crbnr.ProvideSync()
 			newTempo = watch.Bpm
 			if oldTempo != newTempo {
 				watch.D = true
 				oldTempo = newTempo
 			}
-			st <- watch
+			st <- *watch
 			watch.D = false
 		}
 	}()
