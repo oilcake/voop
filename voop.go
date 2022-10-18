@@ -46,8 +46,11 @@ func main() {
 	clock := sync.NewClock(40 * time.Millisecond)
 	defer close(clock.Trigger)
 
+	cnn := sync.NewConnection()
+	crbnr := sync.NewCarabiner(cnn)
+
 	// initialize transport
-	t, err := sync.NewTransport()
+	t, err := sync.NewTransport(*crbnr)
 	if err != nil || t == nil {
 		log.Fatal("can't start transport", err)
 	}

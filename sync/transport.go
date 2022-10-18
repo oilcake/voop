@@ -1,11 +1,10 @@
 package sync
 
-import "log"
+import (
+	"log"
+)
 
 const (
-	protocol = "tcp"
-	address  = "127.0.0.1:17000"
-
 	Measure  = 4 // THIS IS A STUB!!!!
 	Division = 4 // THIS IS A STUB!!!!
 )
@@ -18,7 +17,6 @@ type Transport struct {
 type Status struct {
 	Peers int
 	Bpm   float32
-	Start int64
 	Beat  float64
 	D     bool // "tempo has been changed" flag
 }
@@ -28,9 +26,9 @@ type TimeSignature struct {
 	Division uint8
 }
 
-func NewTransport() (*Transport, error) {
+func NewTransport(crb Carabiner) (*Transport, error) {
 	st := make(chan Status, 3)
-	NewLink(st)
+	NewLink(st, crb)
 	return &Transport{
 		Status:        st,
 		TimeSignature: &TimeSignature{Measure, Division},
