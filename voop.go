@@ -49,8 +49,10 @@ func main() {
 	cnn := sync.NewConnection()
 	crbnr := sync.NewCarabiner(cnn)
 
+	lnk := sync.NewLink(crbnr)
+
 	// initialize transport
-	t, err := sync.NewTransport(*crbnr)
+	t, err := sync.NewTransport(lnk)
 	if err != nil || t == nil {
 		log.Fatal("can't start transport", err)
 	}

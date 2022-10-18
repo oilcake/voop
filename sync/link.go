@@ -1,12 +1,26 @@
 package sync
 
-type Linker interface {
-	ProvideSync() *Status
+type Link struct {
+	st  chan Status
+	lnk Linker
 }
 
-func NewLink(st chan Status, crbnr Carabiner) {
+type Linker interface {
+	ProvideSync() Status
+}
+
+func NewLink(lnk Linker) *Link {
+	l := &Link{
+		st:  make(chan Status, 3),
+		lnk: lnk,
+	}
+	l.spin()
+	return l
+}
+
+func (l *Link) spin() {
 	var (
-		watch    *Status
+		watch    Status
 		oldTempo float32
 		newTempo float32
 	)
@@ -14,15 +28,18 @@ func NewLink(st chan Status, crbnr Carabiner) {
 	go func() {
 		for {
 			oldTempo = watch.Bpm
-			watch = crbnr.ProvideSync()
+			watch = l.lnk.ProvideSync()
 			newTempo = watch.Bpm
 			if oldTempo != newTempo {
 				watch.D = true
 				oldTempo = newTempo
 			}
-			st <- *watch
+			l.st <- watch
 			watch.D = false
 		}
 	}()
+}
 
+func (l *Link) Dock() chan Status {
+	return l.st
 }

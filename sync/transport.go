@@ -26,11 +26,13 @@ type TimeSignature struct {
 	Division uint8
 }
 
-func NewTransport(crb Carabiner) (*Transport, error) {
-	st := make(chan Status, 3)
-	NewLink(st, crb)
+type Engine interface {
+	Dock() chan Status
+}
+
+func NewTransport(e Engine) (*Transport, error) {
 	return &Transport{
-		Status:        st,
+		Status:        e.Dock(),
 		TimeSignature: &TimeSignature{Measure, Division},
 	}, nil
 }
