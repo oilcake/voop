@@ -5,8 +5,8 @@ import (
 )
 
 const (
-	Measure  = 4 // THIS IS A STUB!!!!
-	Division = 4 // THIS IS A STUB!!!!
+	BeatQuantity = 4 // THIS IS A STUB!!!!
+	Divisor      = 4 // THIS IS A STUB!!!!
 )
 
 type Transport struct {
@@ -22,8 +22,8 @@ type Status struct {
 }
 
 type TimeSignature struct {
-	Measure  uint8
-	Division uint8
+	BeatQuantity uint8
+	Divisor      uint8
 }
 
 type Engine interface {
@@ -33,7 +33,7 @@ type Engine interface {
 func NewTransport(e Engine) (*Transport, error) {
 	return &Transport{
 		Status:        e.Dock(),
-		TimeSignature: &TimeSignature{Measure, Division},
+		TimeSignature: &TimeSignature{BeatQuantity, Divisor},
 	}, nil
 }
 

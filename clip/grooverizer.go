@@ -5,11 +5,11 @@ import (
 	"math"
 )
 
-func (m *Media) BarsTotal(duration float64, Measure uint8) (f float64) {
-	beatsTotal := int(Round((m.Duration / duration), float64(Measure)))
+func (m *Media) BarsTotal(duration float64, BeatQuantity uint8) (f float64) {
+	beatsTotal := int(Round((m.Duration / duration), float64(BeatQuantity)))
 	log.SetFlags(log.Lshortfile)
 	log.Println("beats total is", beatsTotal)
-	bars := beatsTotal / int(Measure)
+	bars := beatsTotal / int(BeatQuantity)
 	defer log.Println("bars total", bars)
 	if bars < 1.0 {
 		return 1.0
@@ -32,13 +32,13 @@ func (m *Media) Squarize(b float64) (length float64) {
 func (m *Media) findLoopLength() (loopLen float64) {
 	log.SetFlags(log.Lshortfile)
 	log.Println("one beat is ", m.transport.OneBeatDurationInMs())
-	b := m.BarsTotal(m.transport.OneBeatDurationInMs(), m.transport.TimeSignature.Measure)
+	b := m.BarsTotal(m.transport.OneBeatDurationInMs(), m.transport.TimeSignature.BeatQuantity)
 	if b > 4.0 {
 		loopLen = b
 	} else {
 		loopLen = m.Squarize(b)
 	}
-	loopLen = loopLen * float64(m.transport.TimeSignature.Measure) * m.multiple
+	loopLen = loopLen * float64(m.transport.TimeSignature.BeatQuantity) * m.multiple
 	log.Println("pattern", loopLen)
 	return
 }
