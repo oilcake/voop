@@ -5,7 +5,6 @@ import (
 	"fmt"
 	"image"
 	"log"
-	_ "net/http/pprof"
 	"time"
 	"voop/clip"
 	"voop/config"
@@ -42,13 +41,16 @@ func main() {
 	// and get an actions map from it
 	k := config.CollectShortCuts(conf)
 	fmt.Println(k)
+
 	// initialize clock
 	clock := sync.NewClock(40 * time.Millisecond)
 	defer close(clock.Trigger)
 
+	// establish connection with carabiner
 	cnn := sync.NewConnection()
 	crbnr := sync.NewCarabiner(cnn)
 
+	// and start Link with it
 	lnk := sync.NewLink(crbnr)
 
 	// initialize transport
@@ -57,20 +59,23 @@ func main() {
 		log.Fatal("can't start transport", err)
 	}
 
-	// initialize a display
+	// initialize display
 	window := player.NewWindow("Voop")
 	defer window.Close()
 
-	// create video FX engine
+	// create video FX engine (that currently will just resize your videos)
 	reszr := player.NewResizer(conf.Size.Width, conf.Size.Height)
+
 	// make a player instance
 	p := player.Player{Clock: clock, Window: window, Resizer: *reszr}
 
 	// call VJ
 	m := make(chan *clip.Media)
 	vj := vj.VJ{Player: p, Config: conf, Shortcuts: *k, Transport: t, Media: m}
+
 	// preload a bunch of files
 	vj.OpenLibrary(folder)
+
 	// listen for key presses
 	go vj.WaitForAction()
 
@@ -79,6 +84,5 @@ func main() {
 
 	// Bye
 	log.SetFlags(log.Lshortfile)
-	log.Println()
-	log.Println("ciao")
+	log.Println("\n\nciao")
 }
