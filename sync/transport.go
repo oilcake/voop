@@ -4,11 +4,6 @@ import (
 	"log"
 )
 
-const (
-	BeatQuantity = 4 // THIS IS A STUB!!!!
-	Divisor      = 4 // THIS IS A STUB!!!!
-)
-
 type Transport struct {
 	Status        <-chan Status
 	TimeSignature *TimeSignature
@@ -30,11 +25,11 @@ type Engine interface {
 	Dock() chan Status
 }
 
-func NewTransport(e Engine) (*Transport, error) {
+func NewTransport(e Engine, t *TimeSignature) *Transport {
 	return &Transport{
 		Status:        e.Dock(),
-		TimeSignature: &TimeSignature{BeatQuantity, Divisor},
-	}, nil
+		TimeSignature: t,
+	}
 }
 
 func (t *Transport) OneBeatDurationInMs() (duration float64) {

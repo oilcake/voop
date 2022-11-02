@@ -14,7 +14,9 @@ import (
 )
 
 const (
-	clipWidth = 300.0
+	BeatQuantity = 4 // THIS IS A STUB!!!!
+	Divisor      = 4 // THIS IS A STUB!!!!
+	clipWidth    = 300.0
 )
 
 var (
@@ -53,11 +55,13 @@ func main() {
 	// and start Link with it
 	lnk := sync.NewLink(crbnr)
 
-	// initialize transport
-	t, err := sync.NewTransport(lnk)
-	if err != nil || t == nil {
-		log.Fatal("can't start transport", err)
+	// set time signature
+	ts := &sync.TimeSignature{
+		BeatQuantity: BeatQuantity,
+		Divisor:      Divisor,
 	}
+	// initialize transport
+	t := sync.NewTransport(lnk, ts)
 
 	// initialize display
 	window := player.NewWindow("Voop")
