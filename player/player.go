@@ -1,6 +1,7 @@
 package player
 
 import (
+	"image"
 	"voop/clip"
 	"voop/sync"
 )
@@ -18,6 +19,7 @@ func (p *Player) PlayMedia(media chan *clip.Media) {
 	var (
 		k          int
 		m, garbage *clip.Media
+		clipRes    image.Point
 	)
 	// play it in cycle forever
 play:
@@ -34,7 +36,8 @@ play:
 		// retrieve frame
 		img := p.Media.Frame()
 		// resize
-		p.Resizer.DumbResize(img, p.Media.Shape.AspRt)
+		clipRes = image.Point{int(p.Media.Shape.W), int(p.Media.Shape.H)}
+		p.Resizer.ResizeAndPad(img, clipRes)
 		// and display it
 		p.Window.DisplayFrame(img)
 		k = p.Window.WaitKey(19)
