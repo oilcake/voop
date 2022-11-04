@@ -5,20 +5,21 @@ import (
 	"math"
 )
 
-func (m *Media) BarsTotal(duration float64, BeatQuantity uint8) (f float64) {
-	beatsTotal := int(Round((m.Duration / duration), float64(BeatQuantity)))
-	log.SetFlags(log.Lshortfile)
-	log.Println("beats total is", beatsTotal)
-	bars := beatsTotal / int(BeatQuantity)
-	defer log.Println("bars total", bars)
-	if bars < 1.0 {
-		return 1.0
-	}
-	return float64(bars)
+const mediaIsTooLong = 8 // do not grooverize anything longer than this
+
+// Note that value is rounded
+func (m *Media) ConvertMsToBeats(ms float64) (beats float64) {
+	beats = math.Round(ms / m.transport.DurationOfOneBeatInMs())
+	return
 }
 
-func Round(x, unit float64) float64 {
-	return math.Round(x/unit) * unit
+func (m *Media) BarsTotal(duration float64, BeatQuantity uint8) (f float64) {
+	beatsTotal := m.ConvertMsToBeats(m.Duration)
+	log.SetFlags(log.Lshortfile)
+	log.Println("beats total is", beatsTotal)
+	bars := beatsTotal / float64(BeatQuantity)
+	defer log.Println("bars total", bars)
+	return float64(bars)
 }
 
 func (m *Media) Squarize(b float64) (length float64) {
@@ -31,9 +32,9 @@ func (m *Media) Squarize(b float64) (length float64) {
 
 func (m *Media) findLoopLength() (loopLen float64) {
 	log.SetFlags(log.Lshortfile)
-	log.Println("one beat is ", m.transport.OneBeatDurationInMs())
-	b := m.BarsTotal(m.transport.OneBeatDurationInMs(), m.transport.TimeSignature.BeatQuantity)
-	if b > 4.0 {
+	log.Printf("one beat is %v milliseconds\n", m.transport.DurationOfOneBeatInMs())
+	b := m.BarsTotal(m.transport.DurationOfOneBeatInMs(), m.transport.TimeSignature.BeatQuantity)
+	if b > mediaIsTooLong {
 		loopLen = b
 	} else {
 		loopLen = m.Squarize(b)

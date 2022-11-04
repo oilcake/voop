@@ -1,9 +1,5 @@
 package sync
 
-import (
-	"log"
-)
-
 type Transport struct {
 	Status        <-chan Status
 	TimeSignature *TimeSignature
@@ -32,9 +28,7 @@ func NewTransport(e Engine, t *TimeSignature) *Transport {
 	}
 }
 
-func (t *Transport) OneBeatDurationInMs() (duration float64) {
-	duration = 60.0 / float64((<-t.Status).Bpm)
-	log.SetFlags(log.Lshortfile)
-	log.Printf("one beat is %v seconds\n", duration)
+func (t *Transport) DurationOfOneBeatInMs() (duration float64) {
+	duration = 60.0 * 1000.0 / float64((<-t.Status).Bpm)
 	return
 }

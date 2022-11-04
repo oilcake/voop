@@ -61,7 +61,7 @@ func NewMedia(filename string, t *sync.Transport) (m *Media, err error) {
 	// fill video properties
 	framecount := clip.Get(gocv.VideoCaptureFrameCount)
 	fps := clip.Get(gocv.VideoCaptureFPS)
-	msDur := framecount / fps
+	msDur := framecount / fps * 1000
 	width := clip.Get(gocv.VideoCaptureFrameWidth)
 	height := clip.Get(gocv.VideoCaptureFrameHeight)
 	shape := &ImgShape{

@@ -14,9 +14,9 @@ import (
 )
 
 const (
-	BeatQuantity = 4 // THIS IS A STUB!!!!
-	Divisor      = 4 // THIS IS A STUB!!!!
-	clipWidth    = 300.0
+	DefaultBeatQuantity = 5 // THIS IS A STUB!!!!
+	DefaultDivisor      = 4 // THIS IS A STUB!!!!
+	clipWidth           = 300.0
 )
 
 var (
@@ -57,8 +57,8 @@ func main() {
 
 	// set time signature
 	ts := &sync.TimeSignature{
-		BeatQuantity: BeatQuantity,
-		Divisor:      Divisor,
+		BeatQuantity: DefaultBeatQuantity,
+		Divisor:      DefaultDivisor,
 	}
 	// initialize transport
 	t := sync.NewTransport(lnk, ts)
