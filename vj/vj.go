@@ -36,6 +36,7 @@ func (vj *VJ) OpenLibrary(folder *string) {
 		log.Fatal("error while opening media", err)
 	}
 	vj.Player.Media = m
+	vj.Player.Resizer.ResizeFrom(*m.Shape)
 }
 
 func (vj *VJ) WaitForAction() {

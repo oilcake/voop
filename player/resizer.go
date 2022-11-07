@@ -3,7 +3,7 @@ package player
 import (
 	"image"
 	"image/color"
-	"log"
+	"voop/clip"
 
 	"gocv.io/x/gocv"
 )
@@ -12,60 +12,69 @@ var (
 	targetSize image.Point
 )
 
-type Resizer struct {
-	size         image.Point
-	aspects      image.Point
-	window_width int
+type imgRect struct {
+	X, Y float64
 }
 
-func NewResizer(width, height, window_width int, aspects image.Point) *Resizer {
-	size := image.Point{width, height}
+func (i *imgRect) AsImagePoint() image.Point {
+	return image.Point{int(i.X), int(i.Y)}
+}
+
+type Resizer struct {
+	from imgRect
+	to   imgRect
+}
+
+func NewResizer(width, height int) *Resizer {
 	return &Resizer{
-		size:         size,
-		aspects:      aspects,
-		window_width: window_width,
+		to: imgRect{float64(width), float64(height)},
 	}
 }
 
-func (r *Resizer) DumbResize(frame *gocv.Mat, clipAspect float64) {
-
-	targetSize.X = r.size.X
-	targetSize.Y = int(float64(targetSize.X) / clipAspect)
-	gocv.Resize(*frame, frame, targetSize, 0.0, 0.0, gocv.InterpolationDefault)
-}
-
-func (r *Resizer) ResizeAndPad(frame *gocv.Mat, dim image.Point) {
+func (r *Resizer) ResizeAndPad(frame *gocv.Mat) {
 	// make correct borders:
-	pads := r.center(frame, dim)
-	log.Println("pads", pads.X, pads.Y)
-	gocv.CopyMakeBorder(*frame, frame, pads.X, pads.X, pads.Y, pads.Y, gocv.BorderDefault, color.RGBA{0, 0, 0, 0})
+	pads := r.center()
+	left, top := pads.AsImagePoint().X, pads.AsImagePoint().Y
+	// yeah pretty odd order of axes
+	gocv.CopyMakeBorder(*frame, frame, top, top, left, left, gocv.BorderConstant, color.RGBA{0, 0, 0, 0})
 	x_delta := pads.X * 2
 	y_delta := pads.Y * 2
-	// new_dim := (dim.X + x_delta, dim.Y + y_delta)
 	// get size of the image fitted into window:
-	dim = r.get_resized_dim(dim.X+x_delta, dim.Y+y_delta)
-	gocv.Resize(*frame, frame, dim, 0, 0, gocv.InterpolationNearestNeighbor)
+	desiredShape := r.getResizedDim(r.from.X+x_delta, r.from.Y+y_delta)
+	gocv.Resize(*frame, frame, desiredShape.AsImagePoint(), 0, 0, gocv.InterpolationNearestNeighbor)
 }
 
-func (r *Resizer) get_resized_dim(w, h int) (dim image.Point) {
-	width := float64(w)
-	height := float64(h)
+func (r *Resizer) getResizedDim(width, height float64) (dim imgRect) {
 	aspect := width / height
-	ratio := float64(r.window_width) / width
-	width = float64(width) * ratio
-	height = width / aspect
-	dim = image.Point{int(width), int(height)}
+	ratio := r.to.X / width
+	width = width * ratio
+	height = getHeightFromWidth(width, aspect)
+	dim = imgRect{width, height}
 	return
 }
 
-func (r *Resizer) center(frame *gocv.Mat, dim image.Point) (pads image.Point) {
-
-	width, height := float64(dim.X), float64(dim.Y)
-	aspect := width / height
+func (r *Resizer) center() (pads imgRect) {
 	// define the axis that should be padded (0-x, 1-y):
-	dominant := aspect_ratio(r.aspects) < aspect
-	pads = r.pad(boolToInt(dominant), width, height)
-	return pads
+	width, height := r.from.X, r.from.Y
+	var (
+		top, left, difference float64
+	)
+	switch aspectRatio(r.to) > aspectRatio(r.from) {
+	case true:
+		// pad x:
+		desired_width := getWidthfromHeight(height, aspectRatio(r.to))
+		difference = desired_width - width
+		top = 0
+		left = difference / 2
+	case false:
+		// pad y:
+		desired_height := getHeightFromWidth(width, aspectRatio(r.to))
+		difference = desired_height - height
+		top = difference / 2
+		left = 0
+	}
+	pads = imgRect{left, top}
+	return
 }
 
 func boolToInt(b bool) (i int) {
@@ -78,37 +87,18 @@ func boolToInt(b bool) (i int) {
 	return
 }
 
-func aspect_ratio(aspects image.Point) float64 {
-	x, y := aspects.X, aspects.Y
-	return float64(x) / float64(y)
+func aspectRatio(shape imgRect) float64 {
+	return shape.X / shape.Y
 }
 
-func (r *Resizer) pad(dominant int, width float64, height float64) (pads image.Point) {
-	var (
-		top, left, difference float64
-	)
-	if dominant == 0 {
-		// pad x:
-		desired_width := get_width_from_height(height, aspect_ratio(r.aspects))
-		difference := desired_width - width
-		top = 0
-		left = difference / 2
-	}
-	if dominant == 1 {
-		// pad y:
-		desired_height := get_height_from_width(width, aspect_ratio(r.aspects))
-		difference = desired_height - height
-		top = difference / 2
-		left = 0
-	}
-	pads = image.Point{int(top), int(left)}
-	return
+func (r *Resizer) ResizeFrom(sh clip.ImgShape) {
+	r.from = imgRect{sh.W, sh.H}
 }
 
-func get_height_from_width(width float64, aspect_ratio float64) float64 {
-	return width / aspect_ratio
+func getHeightFromWidth(width float64, aspectRatio float64) float64 {
+	return width / aspectRatio
 }
 
-func get_width_from_height(height float64, aspect_ratio float64) float64 {
-	return height * aspect_ratio
+func getWidthfromHeight(height float64, aspectRatio float64) float64 {
+	return height * aspectRatio
 }

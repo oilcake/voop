@@ -16,8 +16,6 @@ import (
 const (
 	DefaultBeatQuantity = 5 // THIS IS A STUB!!!!
 	DefaultDivisor      = 4 // THIS IS A STUB!!!!
-	clipWidth           = 300.0
-	windowWidth         = 600
 )
 
 var (
@@ -69,10 +67,10 @@ func main() {
 	defer window.Close()
 
 	// create video FX engine (that currently will just resize your videos)
-	reszr := player.NewResizer(conf.Size.Width, conf.Size.Height, windowWidth, image.Point{16, 9})
+	reszr := player.NewResizer(conf.Size.Width, conf.Size.Height)
 
 	// make a player instance
-	p := player.Player{Clock: clock, Window: window, Resizer: *reszr}
+	p := player.Player{Clock: clock, Window: window, Resizer: reszr}
 
 	// call VJ
 	m := make(chan *clip.Media)

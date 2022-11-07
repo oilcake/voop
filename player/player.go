@@ -1,7 +1,6 @@
 package player
 
 import (
-	"image"
 	"voop/clip"
 	"voop/sync"
 )
@@ -9,7 +8,7 @@ import (
 type Player struct {
 	*sync.Clock
 	*Window
-	Resizer
+	*Resizer
 	Media  *clip.Media
 	HotKey chan int
 }
@@ -19,7 +18,6 @@ func (p *Player) PlayMedia(media chan *clip.Media) {
 	var (
 		k          int
 		m, garbage *clip.Media
-		clipRes    image.Point
 	)
 	// play it in cycle forever
 play:
@@ -29,6 +27,7 @@ play:
 			// ok, we've got a media
 			garbage = p.Media
 			p.Media = m
+			p.Resizer.ResizeFrom(*p.Media.Shape)
 			garbage.Close()
 		default:
 			// pass
@@ -36,8 +35,7 @@ play:
 		// retrieve frame
 		img := p.Media.Frame()
 		// resize
-		clipRes = image.Point{int(p.Media.Shape.W), int(p.Media.Shape.H)}
-		p.Resizer.ResizeAndPad(img, clipRes)
+		p.Resizer.ResizeAndPad(img)
 		// and display it
 		p.Window.DisplayFrame(img)
 		k = p.Window.WaitKey(19)
