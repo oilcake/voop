@@ -34,18 +34,9 @@ func NewResizer(width, height int) *Resizer {
 }
 
 func (r *Resizer) ResizeAndPad(frame *gocv.Mat) {
-	// yeah pretty odd order of axes
+	// pretty odd order of axes, remember that
 	gocv.CopyMakeBorder(*frame, frame, r.pads.Y, r.pads.Y, r.pads.X, r.pads.X, gocv.BorderConstant, color.RGBA{0, 0, 0, 0})
 	gocv.Resize(*frame, frame, r.outIntShape, 0, 0, gocv.InterpolationArea)
-}
-
-func (r *Resizer) getResizedDim(width, height float64) (dim imgRect) {
-	aspect := width / height
-	ratio := r.to.X / width
-	width = width * ratio
-	height = getHeightFromWidth(width, aspect)
-	dim = imgRect{width, height}
-	return
 }
 
 func (r *Resizer) center() (pads imgRect) {
