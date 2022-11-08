@@ -16,7 +16,6 @@ import (
 const (
 	DefaultBeatQuantity = 5 // THIS IS A STUB!!!!
 	DefaultDivisor      = 4 // THIS IS A STUB!!!!
-	clipWidth           = 300.0
 )
 
 var (
@@ -71,7 +70,7 @@ func main() {
 	reszr := player.NewResizer(conf.Size.Width, conf.Size.Height)
 
 	// make a player instance
-	p := player.Player{Clock: clock, Window: window, Resizer: *reszr}
+	p := player.Player{Clock: clock, Window: window, Resizer: reszr}
 
 	// call VJ
 	m := make(chan *clip.Media)

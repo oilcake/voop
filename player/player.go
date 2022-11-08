@@ -8,7 +8,7 @@ import (
 type Player struct {
 	*sync.Clock
 	*Window
-	Resizer
+	*Resizer
 	Media  *clip.Media
 	HotKey chan int
 }
@@ -27,6 +27,7 @@ play:
 			// ok, we've got a media
 			garbage = p.Media
 			p.Media = m
+			p.Resizer.ResizeFrom(*p.Media.Shape)
 			garbage.Close()
 		default:
 			// pass
@@ -34,7 +35,7 @@ play:
 		// retrieve frame
 		img := p.Media.Frame()
 		// resize
-		p.Resizer.DumbResize(img, p.Media.Shape.AspRt)
+		p.Resizer.ResizeAndPad(img)
 		// and display it
 		p.Window.DisplayFrame(img)
 		k = p.Window.WaitKey(19)

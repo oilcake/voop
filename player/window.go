@@ -18,9 +18,6 @@ func NewWindow(name string) *Window {
 	if !window.IsOpen() {
 		log.Fatal("Window should have been open")
 	}
-	window.SetWindowProperty(gocv.WindowPropertyAutosize, gocv.WindowNormal)
-	window.SetWindowProperty(gocv.WindowPropertyAspectRatio, gocv.WindowKeepRatio)
-	// window.ResizeWindow(100, 100)
 	return &Window{Window: window}
 }
 
@@ -29,6 +26,5 @@ func (w *Window) Fullscreen() {
 }
 
 func (w *Window) DisplayFrame(img *gocv.Mat) {
-
 	w.IMShow(*img)
 }
