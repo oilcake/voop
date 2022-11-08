@@ -72,16 +72,6 @@ func (r *Resizer) center() (pads imgRect) {
 	return
 }
 
-func boolToInt(b bool) (i int) {
-	switch b {
-	case true:
-		i = 1
-	case false:
-		i = 0
-	}
-	return
-}
-
 func aspectRatio(shape imgRect) float64 {
 	return shape.X / shape.Y
 }
@@ -94,10 +84,10 @@ func (r *Resizer) ResizeFrom(sh clip.ImgShape) {
 	r.outIntShape = r.to.AsImagePoint()
 }
 
-func getHeightFromWidth(width float64, aspectRatio float64) float64 {
+func getHeightFromWidth(width, aspectRatio float64) float64 {
 	return width / aspectRatio
 }
 
-func getWidthfromHeight(height float64, aspectRatio float64) float64 {
+func getWidthfromHeight(height, aspectRatio float64) float64 {
 	return height * aspectRatio
 }

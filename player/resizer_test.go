@@ -1,6 +1,7 @@
 package player
 
 import (
+	"image"
 	"testing"
 	"voop/clip"
 
@@ -46,7 +47,7 @@ func TestAspectRatio(t *testing.T) {
 	}
 }
 
-func TestCenterPads(t *testing.T) {
+func TestCenter(t *testing.T) {
 	type testCase struct {
 		name         string
 		inTo         imgRect
@@ -65,6 +66,98 @@ func TestCenterPads(t *testing.T) {
 			resiza.ResizeFrom(tc.inFrom)
 			actual := resiza.center()
 			assert.Equal(t, tc.expectedPads, actual, "should be equal")
+		})
+	}
+}
+
+func TestResize(t *testing.T) {
+
+	type testCase struct {
+		name          string
+		inTo          imgRect
+		inFrom        clip.ImgShape
+		expectedShape image.Point
+	}
+
+	display := imgRect{16, 16}
+
+	testCases := []testCase{
+		{name: "square", inTo: display, inFrom: clip.ImgShape{W: 8, H: 8}, expectedShape: display.AsImagePoint()},
+		{name: "longer X", inTo: display, inFrom: clip.ImgShape{W: 13, H: 8}, expectedShape: display.AsImagePoint()},
+		{name: "longer Y", inTo: display, inFrom: clip.ImgShape{W: 13, H: 15}, expectedShape: display.AsImagePoint()},
+	}
+	for _, tc := range testCases {
+		t.Run(tc.name, func(t *testing.T) {
+			tc := tc
+			t.Parallel()
+			resiza := NewResizer(int(tc.inTo.X), int(tc.inTo.Y))
+			resiza.ResizeFrom(tc.inFrom)
+			actual := resiza.outIntShape
+			assert.Equal(t, tc.expectedShape, actual, "should be equal")
+		})
+	}
+}
+
+func TestGetWidthFromHeight(t *testing.T) {
+	type testCase struct {
+		name          string
+		inHeight      float64
+		inAspect      float64
+		expectedWidth float64
+	}
+
+	testCases := []testCase{
+		{
+			name:          "width from height 01",
+			inHeight:      8,
+			inAspect:      2,
+			expectedWidth: 16,
+		},
+		{
+			name:          "width from height 02",
+			inHeight:      9,
+			inAspect:      1.4444444444444444,
+			expectedWidth: 13,
+		},
+	}
+	for _, tc := range testCases {
+		t.Run(tc.name, func(t *testing.T) {
+			tc := tc
+			t.Parallel()
+			actual := getWidthfromHeight(tc.inHeight, tc.inAspect)
+			assert.Equal(t, tc.expectedWidth, actual, "should be equal")
+		})
+	}
+}
+
+func TestGetHeightFromWidth(t *testing.T) {
+	type testCase struct {
+		name           string
+		inWidth        float64
+		inAspect       float64
+		expectedHeight float64
+	}
+
+	testCases := []testCase{
+		{
+			name:           "height from width 01",
+			inWidth:        16,
+			inAspect:       2,
+			expectedHeight: 8,
+		},
+		{
+			name:           "height from width 02",
+			inWidth:        13,
+			inAspect:       1.4444444444444444,
+			expectedHeight: 9,
+		},
+	}
+	for _, tc := range testCases {
+		t.Run(tc.name, func(t *testing.T) {
+			tc := tc
+			t.Parallel()
+			actual := getHeightFromWidth(tc.inWidth, tc.inAspect)
+			assert.Equal(t, tc.expectedHeight, actual, "should be equal")
 		})
 	}
 }
