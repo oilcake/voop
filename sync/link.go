@@ -21,8 +21,8 @@ func NewLink(lnk Linker) *Link {
 func (l *Link) spin() {
 	var (
 		watch    Status
-		oldTempo float32
-		newTempo float32
+		oldTempo float64
+		newTempo float64
 	)
 	watch.Bpm = 0.0
 	go func() {

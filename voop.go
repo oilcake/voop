@@ -3,7 +3,6 @@ package main
 import (
 	"flag"
 	"fmt"
-	"image"
 	"log"
 	"time"
 	"voop/clip"
@@ -16,10 +15,6 @@ import (
 const (
 	DefaultBeatQuantity = 5 // THIS IS A STUB!!!!
 	DefaultDivisor      = 4 // THIS IS A STUB!!!!
-)
-
-var (
-	scaledSize image.Point
 )
 
 func main() {

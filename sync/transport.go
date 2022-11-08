@@ -7,7 +7,7 @@ type Transport struct {
 
 type Status struct {
 	Peers int
-	Bpm   float32
+	Bpm   float64
 	Beat  float64
 	D     bool // "tempo has been changed" flag
 }
@@ -29,6 +29,6 @@ func NewTransport(e Engine, t *TimeSignature) *Transport {
 }
 
 func (t *Transport) DurationOfOneBeatInMs() (duration float64) {
-	duration = 60.0 * 1000.0 / float64((<-t.Status).Bpm)
+	duration = 60.0 * 1000.0 / (<-t.Status).Bpm
 	return
 }
