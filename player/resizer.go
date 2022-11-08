@@ -21,8 +21,10 @@ func (i *imgRect) AsImagePoint() image.Point {
 }
 
 type Resizer struct {
-	from imgRect
-	to   imgRect
+	from        imgRect
+	to          imgRect
+	pads        image.Point
+	outIntShape image.Point
 }
 
 func NewResizer(width, height int) *Resizer {
@@ -32,16 +34,9 @@ func NewResizer(width, height int) *Resizer {
 }
 
 func (r *Resizer) ResizeAndPad(frame *gocv.Mat) {
-	// make correct borders:
-	pads := r.center()
-	left, top := pads.AsImagePoint().X, pads.AsImagePoint().Y
 	// yeah pretty odd order of axes
-	gocv.CopyMakeBorder(*frame, frame, top, top, left, left, gocv.BorderConstant, color.RGBA{0, 0, 0, 0})
-	x_delta := pads.X * 2
-	y_delta := pads.Y * 2
-	// get size of the image fitted into window:
-	desiredShape := r.getResizedDim(r.from.X+x_delta, r.from.Y+y_delta)
-	gocv.Resize(*frame, frame, desiredShape.AsImagePoint(), 0, 0, gocv.InterpolationNearestNeighbor)
+	gocv.CopyMakeBorder(*frame, frame, r.pads.Y, r.pads.Y, r.pads.X, r.pads.X, gocv.BorderConstant, color.RGBA{0, 0, 0, 0})
+	gocv.Resize(*frame, frame, r.outIntShape, 0, 0, gocv.InterpolationArea)
 }
 
 func (r *Resizer) getResizedDim(width, height float64) (dim imgRect) {
@@ -93,6 +88,10 @@ func aspectRatio(shape imgRect) float64 {
 
 func (r *Resizer) ResizeFrom(sh clip.ImgShape) {
 	r.from = imgRect{sh.W, sh.H}
+	// make correct borders:
+	pads := r.center()
+	r.pads = pads.AsImagePoint()
+	r.outIntShape = r.to.AsImagePoint()
 }
 
 func getHeightFromWidth(width float64, aspectRatio float64) float64 {
