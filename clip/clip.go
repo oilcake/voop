@@ -26,12 +26,12 @@ type Media struct {
 	Duration   float64
 	Framecount float64
 	F          *gocv.Mat //this is a current frame object
-	LoopLen    float64   // Media pattern's length
 	Shape      *ImgShape
-	multiple   float64
-	RateX      chan float64
 	// creepy loop stuff
 	transport    *sync.Transport
+	LoopLen      float64 // Media pattern's length
+	multiple     float64
+	RateX        chan float64
 	forward      bool
 	palindrome   bool
 	plndrmTrigga chan struct{}
