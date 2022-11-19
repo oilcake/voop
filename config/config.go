@@ -1,7 +1,7 @@
 package config
 
 import (
-	"io/ioutil"
+	"os"
 	"reflect"
 
 	yaml "gopkg.in/yaml.v2"
@@ -43,7 +43,7 @@ type Config struct {
 }
 
 func ReadConfig(filename string) (config Config) {
-	yamlFile, err := ioutil.ReadFile(filename)
+	yamlFile, err := os.ReadFile(filename)
 	check(err)
 	err = yaml.Unmarshal(yamlFile, &config)
 	check(err)

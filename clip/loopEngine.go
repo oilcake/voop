@@ -24,7 +24,6 @@ func (m *Media) calcFrame() (frame float64) {
 	switch m.forward {
 	case true:
 		m.shiftedPhase = m.phase - m.offset
-		break
 	case false:
 		m.shiftedPhase = m.antiphase + m.offset
 	}
@@ -34,7 +33,6 @@ func (m *Media) calcFrame() (frame float64) {
 		// shift = (m.offset - m.timepoint) * 0.5
 		m.shiftedPhase = Wrap(m.shiftedPhase+m.timepoint, 1)
 		m.shiftedPhase = math.Abs(m.dirPld - math.Abs(m.shiftedPhase*2.0-1))
-		break
 	case false:
 		m.shiftedPhase = Wrap(m.shiftedPhase+m.timepoint, 1)
 	}
@@ -109,7 +107,6 @@ func (m *Media) multRate(rate float64) {
 		m.phase = m.LoopPhase()
 		m.offset = m.phase
 		m.timepoint = t
-		break
 	case true:
 		m.multiple *= rate
 		m.Grooverize()

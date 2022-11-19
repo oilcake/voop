@@ -10,10 +10,6 @@ import (
 	"gocv.io/x/gocv"
 )
 
-var (
-	f, shift, dir float64
-)
-
 type ImgShape struct {
 	W     float64
 	H     float64
@@ -42,7 +38,6 @@ type Media struct {
 	antiphase    float64
 	timepoint    float64
 	hardSync     bool
-	pldOffset    float64
 }
 
 func NewMedia(filename string, t *sync.Transport) (m *Media, err error) {

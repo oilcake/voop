@@ -8,10 +8,6 @@ import (
 	"gocv.io/x/gocv"
 )
 
-var (
-	targetSize image.Point
-)
-
 type imgRect struct {
 	X, Y float64
 }

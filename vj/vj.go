@@ -9,12 +9,6 @@ import (
 	"voop/sync"
 )
 
-var (
-	err             error
-	oldMedia, media *clip.Media
-	mNext           chan *clip.Media
-)
-
 type VJ struct {
 	Transport *sync.Transport
 	Player    player.Player

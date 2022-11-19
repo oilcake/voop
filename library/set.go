@@ -1,8 +1,8 @@
 package library
 
 import (
-	"io/ioutil"
 	"log"
+	"os"
 	"path/filepath"
 )
 
@@ -56,7 +56,7 @@ func SupportedFilesFrom(path string, supported []string) (sf []string) {
 }
 
 func AddFiles(sf *[]string, path string, supported []string) error {
-	files, err := ioutil.ReadDir(path)
+	files, err := os.ReadDir(path)
 	if err != nil {
 		return err
 	}

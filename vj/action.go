@@ -5,8 +5,6 @@ import (
 	"voop/config"
 )
 
-var key string
-
 func (vj *VJ) Action(action config.Action) {
 	switch action.Target {
 	case "Clip":

@@ -1,8 +1,6 @@
 package library
 
-import (
-	"io/ioutil"
-)
+import "os"
 
 // type Folder string
 
@@ -17,7 +15,7 @@ func (l *Library) What(i int) *cat {
 
 func NewLibrary(path *string, supported []string) (l *Library, err error) {
 	d := make([]*cat, 0)
-	dirs, err := ioutil.ReadDir(*path)
+	dirs, err := os.ReadDir(*path)
 	if err != nil {
 		return nil, err
 	}
