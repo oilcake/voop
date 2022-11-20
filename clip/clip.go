@@ -101,6 +101,11 @@ func (m *Media) Frame() *gocv.Mat {
 	return m.F
 }
 
+func (m *Media) calcFrame() (frame float64) {
+	frame = m.Framecount * m.Position()
+	return
+}
+
 func (m *Media) Close() {
 	m.V.Close()
 	m.F.Close()

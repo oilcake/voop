@@ -12,7 +12,7 @@ var (
 	r float64
 )
 
-func (m *Media) calcFrame() (frame float64) {
+func (m *Media) Position() (pos float64) {
 	select {
 	case r = <-m.RateX:
 		m.multRate(r)
@@ -36,9 +36,9 @@ func (m *Media) calcFrame() (frame float64) {
 	case false:
 		m.shiftedPhase = Wrap(m.shiftedPhase+m.timepoint, 1)
 	}
-	frame = m.Framecount * m.shiftedPhase
-	fmt.Printf("\rCurrent frame %06d, phase %.2f, offset %.2f, shiftedPhase %.2f, dirPld %.2f",
-		int(frame), m.phase, m.offset, m.shiftedPhase, m.dirPld)
+	pos = m.shiftedPhase
+	fmt.Printf("\rCurrent phase is %.2f, offset %.2f, shiftedPhase %.2f, dirPld %.2f",
+		m.phase, m.offset, m.shiftedPhase, m.dirPld)
 	return
 }
 
