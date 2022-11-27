@@ -32,12 +32,12 @@ type Media struct {
 	palindrome   bool
 	plndrmTrigga chan struct{}
 	phase        float64
-	dirPld       float64
 	offset       float64
 	shiftedPhase float64
 	antiphase    float64
 	timepoint    float64
 	hardSync     bool
+	pldShift     float64
 }
 
 func NewMedia(filename string, t *sync.Transport) (m *Media, err error) {

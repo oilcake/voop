@@ -30,15 +30,14 @@ func (m *Media) Position() (pos float64) {
 	// check palindromicity
 	switch m.palindrome {
 	case true:
-		// shift = (m.offset - m.timepoint) * 0.5
-		m.shiftedPhase = Wrap(m.shiftedPhase+m.timepoint, 1)
-		m.shiftedPhase = math.Abs(m.dirPld - math.Abs(m.shiftedPhase*2.0-1))
+		m.shiftedPhase = Wrap(m.shiftedPhase+m.timepoint+m.pldShift, 1)
+		m.shiftedPhase = math.Abs(m.shiftedPhase*2.0 - 1)
 	case false:
 		m.shiftedPhase = Wrap(m.shiftedPhase+m.timepoint, 1)
 	}
 	pos = m.shiftedPhase
-	fmt.Printf("\rCurrent phase is %.2f, offset %.2f, shiftedPhase %.2f, dirPld %.2f",
-		m.phase, m.offset, m.shiftedPhase, m.dirPld)
+	fmt.Printf("\rCurrent phase is %.2f, offset %.2f, shiftedPhase %.2f",
+		m.phase, m.offset, m.shiftedPhase)
 	return
 }
 
@@ -61,13 +60,13 @@ func (m *Media) LoopPhase() (phase float64) {
 
 func (m *Media) PalindromemordnilaP() {
 	m.palindrome = !m.palindrome
+	m.pldShift = (1 - m.shiftedPhase) / 2
 	switch m.palindrome {
 	case true:
 		m.RateX <- 2.0
 	case false:
 		m.RateX <- 0.5
 	}
-	// m.pldOffset = m.shiftedPhase - m.GetLoopPhase(m.LoopLen*2)
 }
 
 func (m *Media) Swap() {
