@@ -38,6 +38,7 @@ type Media struct {
 	timepoint    float64
 	hardSync     bool
 	pldShift     float64
+	pldDir       float64
 }
 
 func NewMedia(filename string, t *sync.Transport) (m *Media, err error) {

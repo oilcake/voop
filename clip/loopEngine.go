@@ -31,7 +31,9 @@ func (m *Media) Position() (pos float64) {
 	switch m.palindrome {
 	case true:
 		m.shiftedPhase = Wrap(m.shiftedPhase+m.timepoint+m.pldShift, 1)
-		m.shiftedPhase = math.Abs(m.shiftedPhase*2.0 - 1)
+		// this pldDir may somehow help to resolve direction switch in palindrome mode
+		m.pldDir = m.shiftedPhase*2.0 - 1
+		m.shiftedPhase = math.Abs(m.pldDir)
 	case false:
 		m.shiftedPhase = Wrap(m.shiftedPhase+m.timepoint, 1)
 	}
@@ -58,9 +60,13 @@ func (m *Media) LoopPhase() (phase float64) {
 	return
 }
 
+func (m *Media) updatePldShift() {
+	m.pldShift = (1 - m.shiftedPhase) / 2
+}
+
 func (m *Media) PalindromemordnilaP() {
 	m.palindrome = !m.palindrome
-	m.pldShift = (1 - m.shiftedPhase) / 2
+	m.updatePldShift()
 	switch m.palindrome {
 	case true:
 		m.RateX <- 2.0
@@ -70,6 +76,7 @@ func (m *Media) PalindromemordnilaP() {
 }
 
 func (m *Media) Swap() {
+	m.updatePldShift()
 	m.forward = !m.forward
 	if !m.hardSync {
 		m.timepoint = m.shiftedPhase
@@ -98,6 +105,7 @@ func (m *Media) DefaultRate() {
 }
 
 func (m *Media) multRate(rate float64) {
+	m.updatePldShift()
 	switch m.hardSync {
 	case false:
 		t := m.shiftedPhase
