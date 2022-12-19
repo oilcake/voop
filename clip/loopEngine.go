@@ -12,14 +12,14 @@ var (
 	r float64
 )
 
-func (m *Media) Position() (pos float64) {
+func (m *Media) Position() float64 {
 	select {
 	case r = <-m.RateX:
 		m.multRate(r)
-		m.phase = m.LoopPhase()
 	default:
-		m.phase = m.LoopPhase()
+		// do nothing
 	}
+	m.phase = m.LoopPhase()
 	m.antiphase = -m.phase
 	switch m.forward {
 	case true:
@@ -37,10 +37,9 @@ func (m *Media) Position() (pos float64) {
 	case false:
 		m.shiftedPhase = Wrap(m.shiftedPhase+m.timepoint, 1)
 	}
-	pos = m.shiftedPhase
 	fmt.Printf("\rCurrent phase is %.2f, offset %.2f, shiftedPhase %.2f",
 		m.phase, m.offset, m.shiftedPhase)
-	return
+	return m.shiftedPhase
 }
 
 func (m *Media) GetLoopPhase(loopLen float64) (phase float64) {
