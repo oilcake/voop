@@ -74,6 +74,20 @@ func (m *Media) PalindromemordnilaP() {
 	}
 }
 
+func (m *Media) validateDirection() {
+	fmt.Println("\nDir is", m.pldDir)
+	if m.palindrome {
+		switch {
+		case m.pldDir <= 0 && m.forward:
+			fmt.Println("\nBOOOOOOMMMM")
+			m.Swap()
+		case m.pldDir > 0 && !m.forward:
+			fmt.Println("\nMOOOOOOBBBBBBB")
+			m.Swap()
+		}
+	}
+}
+
 func (m *Media) Swap() {
 	m.updatePldShift()
 	m.forward = !m.forward
@@ -81,6 +95,7 @@ func (m *Media) Swap() {
 		m.timepoint = m.shiftedPhase
 		m.offset = m.phase
 	}
+	m.validateDirection()
 }
 
 func (m *Media) Zero() {

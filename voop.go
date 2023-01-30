@@ -13,8 +13,10 @@ import (
 )
 
 const (
-	DefaultBeatQuantity = 5 // THIS IS A STUB!!!!
-	DefaultDivisor      = 4 // THIS IS A STUB!!!!
+	// should be moved to project's entity
+	// currently only for testing purposes
+	DefaultBeatQuantity = 5
+	DefaultDivisor      = 4
 )
 
 func main() {
@@ -61,10 +63,10 @@ func main() {
 	window := player.NewWindow("Voop")
 	defer window.Close()
 
-	// create video FX engine (that currently will just resize your videos)
+	// instance of resizer object - needed to keep clip's aspect ratio
 	reszr := player.NewResizer(conf.Size.Width, conf.Size.Height)
 
-	// make a player instance
+	// player instance
 	p := player.Player{Clock: clock, Window: window, Resizer: reszr}
 
 	// call VJ
@@ -74,10 +76,10 @@ func main() {
 	// preload a bunch of files
 	vj.OpenLibrary(folder)
 
-	// listen for key presses
+	// listen for hotkeys
 	go vj.WaitForAction()
 
-	// and play it forever
+	// will play until somebody hit Esc
 	vj.Player.PlayMedia(vj.Media)
 
 	// Bye
